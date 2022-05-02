@@ -1,0 +1,898 @@
+---
+title: "Initial observations on the 2021 Myanmar Food Security Cluster 5Ws"
+author: "Myanmar Food Security Cluster"
+date: "04/02/2022"
+output:
+  html_document:
+    code_download: yes
+    theme: readable
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    number_sections: no
+    collapsed: no
+always_allow_html: yes
+---
+
+```{css, echo=FALSE}
+
+#TOC::before {
+  content: "";
+  display: block;
+  height: 70px;
+  margin: 2em 20px 40px 20px;
+  background-image: url("Myanmar_cluster_blue.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+```
+
+```{=html}
+<style>
+    body .main-container {
+        max-width: 1280px;
+    }
+</style>
+```
+
+### setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=9, message = FALSE, warning=FALSE)
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(stringi)
+library(pander)
+library(janitor)
+library(fuzzyjoin)
+library(scales)
+library(magrittr)
+library(sf)
+library(kableExtra)
+library(viridis)
+library(skimr)
+library(plotly)
+library(patchwork)
+
+
+theme_set(theme_light())
+
+# disabling scientific notation
+options(scipen = 100)
+
+# pander tables all in one row
+panderOptions('table.split.table', Inf)
+
+# pander thousands separator
+panderOptions("big.mark", ",")
+
+# replace 
+opts <- options(knitr.kable.NA = "")
+
+`%out%` <- Negate(`%in%`)
+
+# function for transposing df
+transpose_df <- function(df) {
+  t_df <- data.table::transpose(df)
+  colnames(t_df) <- rownames(df)
+  rownames(t_df) <- colnames(df)
+  t_df <- t_df %>%
+    tibble::rownames_to_column(.data = .) %>%
+    tibble::as_tibble(.)
+  return(t_df)
+}
+
+# function beneficiary summaries
+sum_ben <- function(df, column_var){
+  
+  column_var <- enquo(column_var)
+  
+  df %>%
+    group_by(!!column_var) %>% # must add bang-bang
+    summarise(beneficiaries = sum(beneficiaries)) %>% 
+    arrange(desc(beneficiaries))
+    
+}
+
+# function beneficiary summaries, 2 grouped variables
+sum_ben2 <- function(df, column_var1, column_var2){
+  
+  column_var1 <- enquo(column_var1)
+  column_var2 <- enquo(column_var2)
+  
+  df %>%
+    group_by(!!column_var1, !!column_var2) %>% # must add bang-bang
+    summarise(beneficiaries = sum(beneficiaries)) %>% 
+    arrange(desc(beneficiaries))
+    
+}
+
+# scaling functions 
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+range_wna <- function(x){(x-min(x, na.rm = TRUE))/(max(x, na.rm = TRUE)-min(x, na.rm = TRUE))}
+
+#mode function 
+mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+pcode4 <- read_excel("2022_FSCMYA_5W_template.xlsx", 
+           sheet = "GEOADMINS") %>% 
+  clean_names() %>% 
+  select(admin1pcode_9:admin1_3) %>% 
+  rename(admin1_pcode = admin1pcode_9,
+         state = state_10, 
+         township = township_11,
+         admin3_pcode = admin3pcode_12, 
+         vt_town = vt_and_town_13, 
+         admin4_pcode = vt_and_town_pcode_14)
+ 
+villages <- read_excel("2022_FSCMYA_5W_template.xlsx", 
+           sheet = "GEOADMINS") %>% 
+  clean_names() %>%
+  select(admin1pcode_17:location_type) %>% 
+  rename(admin1_pcode = admin1pcode_17,
+         state = state_18, 
+         township = township_19,
+         admin3_pcode = admin3pcode_20, 
+         vt_town = vt_and_town_21, 
+         admin4_pcode = vt_and_town_pcode_22)
+
+camps <- read_excel("2022_FSCMYA_5W_template.xlsx", 
+           sheet = "GEOADMINS") %>% 
+  clean_names() %>%
+  select(township = township_29, camp_name, pcode_camp = p_code_camp)
+
+industrial_zones <- read_excel("2022_FSCMYA_5W_template.xlsx", 
+           sheet = "GEOADMINS") %>% 
+  clean_names() %>% 
+  select(state = state_36, admin1_pcode = admin1pcode_37, industrial_zone = industrial_zones)
+
+fsc <- read_csv("fsc_codes.csv") %>% 
+  rename_all(~str_replace_all(., "^number_of_", "")) %>%
+  rename_all(~str_replace_all(., "^number_", "")) %>%
+  rename(specify_location = specify_location_if_the_the_location_is_not_in_the_list) %>% 
+  mutate(idp_camp_site_name= as.character(idp_camp_site_name)) %>% 
+  mutate(location = case_when(!is.na(idp_camp_site_name) ~ idp_camp_site_name,
+                              !is.na(village_ward) ~ village_ward,
+                              !is.na(specify_location) ~ specify_location,
+                              !is.na(village_tract_town) ~ village_tract_town)) %>%
+  mutate(date = my(month_of_implementation)) %>% 
+  rename(activity = fsc_main_activity) %>% 
+  mutate(township = recode(township, "Putao" = "Puta-O"), 
+         admin3_pcode = ifelse(township == "Puta-O", "MMR001014", admin3_pcode)) %>% 
+  left_join(pcode4 %>% select(township, vt_town, admin3_pcode, admin4_pcode, admin1_pcode), by = 
+              c("village_tract_town" = "vt_town", "township" = "township", 
+                "admin3_pcode" = "admin3_pcode", "admin1_pcode" = "admin1_pcode")) %>% 
+  mutate(total_value_usd = case_when(currency == "MMK" ~ total_value / 1776, 
+                                     currency == "USD" ~ total_value)) %>% 
+  rename(state = state_region) %>% 
+  mutate(admin3_pcode_old = case_when(admin3_pcode %in% c("MMR013046", "MMR013047") ~ "MMR013008", 
+                                  admin3_pcode == "MMR015202" ~ "MMR015022",
+                                  admin3_pcode == "MMR015315" ~ "MMR015010", 
+                                  admin3_pcode == "MMR015312" ~ "MMR015006",	
+                                  admin3_pcode == "MMR015308" ~ "MMR015007",
+                                  admin3_pcode == "MMR016321" ~ "MMR016003", 
+                                  TRUE ~ admin3_pcode)) %>% 
+  # removing a duplicate entry from the left join 
+  filter(admin4_pcode != "MMR007008058") %>% 
+  replace_na(list(new_beneficiaries = 0)) %>% 
+  mutate(activity_red = case_when(activity %in% c("food distributions (in kind/voucher/cash), moderate", 
+                                                  "food distributions (in kind/voucher/cash), severe") ~ 
+                                    "food distribution",
+                                  activity %in% c("multi-purpose cash transfer (MPC), moderate",
+                                                  "multi-purpose cash transfer (MPC), severe") ~ 
+                                    "multi-purpose cash transfer",
+                                  activity == "livelihoods vocational training" ~ "vocational training",
+                                  activity == "food/cash for work/assets" ~ "food_cash for work_assets",
+                                  activity == "income-generating activities and small grants" ~ "IGA and small grants", 
+                                  TRUE ~ activity)) %>% 
+  mutate(strat_obj = case_when(activity_red %in% c("food distribution", "multi-purpose cash transfer") & 
+                          beneficiary_type == "Internally Displaced" ~ 
+                          "so_1", 
+                        activity_red %in% c("food distribution", "multi-purpose cash transfer") & 
+                          beneficiary_type != "Internally Displaced" ~ 
+                          "so_2", 
+                        TRUE ~ "so_3")) %>% 
+   # these partners did not provide the numbers of reached_households
+  mutate(reached_households = ifelse(is.na(reached_households), reached_beneficiaries, reached_households)) %>% 
+  mutate(usd_per_hhd = total_value_usd / reached_households, 
+         usd_per_person = total_value_usd / reached_beneficiaries) %>% 
+  mutate(usd_hhd_bin = case_when(usd_per_hhd < 10 ~ "<$10",
+                     usd_per_hhd >= 10 & usd_per_hhd < 20 ~ ">=$10_<$20",
+                     usd_per_hhd >= 20 & usd_per_hhd < 30 ~ ">=$20_<$30",
+                     usd_per_hhd >= 30 & usd_per_hhd < 40 ~ ">=$30_<$40",
+                     usd_per_hhd >= 40 & usd_per_hhd < 50 ~ ">=$40_<$50",
+                     usd_per_hhd >= 50 & usd_per_hhd < 60 ~ ">=$50_<$60",
+                     usd_per_hhd >= 60 & usd_per_hhd < 70 ~ ">=$60_<$70",
+                     usd_per_hhd >= 70 & usd_per_hhd < 80 ~ ">=$70_<$80",
+                     usd_per_hhd >= 80 & usd_per_hhd < 90 ~ ">=$80_<$90",
+                     usd_per_hhd >= 90 & usd_per_hhd < 100 ~ ">=$90_<$100",
+                     usd_per_hhd >= 100 ~ ">=$100",
+                     TRUE ~ NA_character_),
+         usd_hhd_bin = fct_relevel(usd_hhd_bin, c("<$10", ">=$10_<$20", ">=$20_<$30", ">=$30_<$40", ">=$40_<$50",">=$50_<$60", 
+                                                  ">=$60_<$70", ">=$70_<$80", ">=$80_<$90",">=$90_<$100",">=$100"))) %>% 
+  rename(partner_code = org_code) 
+ 
+  
+pin <- read_csv("fs_pin.csv") %>% 
+  select(-admin1_pcode) %>% 
+  left_join(pcode4 %>% distinct(admin1_pcode, state), by = "state")
+
+
+fsc_2021 <- read_csv("fsc5w_2021.csv") %>%
+  mutate(activity_new = 
+           case_when(str_detect(activity_description, "Local Chicken support") ~
+                       "provision of livestock kits",
+                     activity == "Cash for Work / Food for Assets" ~
+                       "food/cash for work/assets",
+                     str_detect(activity_description, "home|Home") & 
+                       !str_detect(activity_description, "training|Training|Training,") ~
+                       "provision of kitchen garden kits",
+                     activity == "Provide crops & vegetables kits" & 
+                       str_detect(activity_description, "pumps|till|drum|Tiller|Drum") ~ 
+                       "provision of community infrastructure and equipment",
+                     activity == "Provide crops & vegetables kits" ~ 
+                       "provision of crop, vegetable and seed kits",
+                     activity == "Provide fishery kits" ~ 
+                       "provision of fishery kits",
+                     activity == "Provide livestock kits" ~ 
+                       "provision of livestock kits",
+                     activity %in% c("Provide monthly cash-based transfers", "Provide monthly food baskets") & 
+                       str_detect(activity_description, "Lifesaving|lifesaving|acute|Acute") ~ 
+                       "food distributions (in kind/voucher/cash), severe",
+                     # what to do about MVC, malnourished children and PLW?
+                     activity %in% c("Provide monthly cash-based transfers", "Provide monthly food baskets")  ~
+                       "food distributions (in kind/voucher/cash), moderate",  
+                     activity == "Provide support for income generation" & 
+                       !str_detect(activity_description, "agriculture input|farming") ~
+                       "income-generating activities and small grants",
+                     activity  == "Provide support for income generation"  ~
+                       "income-generating activities and small grants",
+                     activity == "Provide technical training" & str_detect(activity_description,
+                                               "farm|Farm|FFS|pesticide|ferti|agri|Agri|gardening|Seed|seed|SSA") ~
+                       "FFS and farmer training",
+                     activity == "Provide technical training" ~ "vocational training",
+                     activity_description %in% c("Provide Voucher Cards to buy agriculture inputs for their agricultural works",
+                                                 "Cash for farming (Livestock and Agri)") ~
+                       "provision of crop, vegetable and seed kits", 
+                     TRUE ~ NA_character_)) %>% 
+   mutate(activity_red = case_when(activity_new %in% c("food distributions (in kind/voucher/cash), moderate",
+                                                   "food distributions (in kind/voucher/cash), severe") ~
+                                     "food distribution",
+                                  activity_new %in% c("multi-purpose cash transfer (MPC), moderate",
+                                                  "multi-purpose cash transfer (MPC), severe") ~ 
+                                    "multi-purpose cash transfer",
+                                  activity == "livelihoods vocational training" ~ "vocational training",
+                                  activity == "food/cash for work/assets" ~ "food_cash for work_assets",
+                                  activity == "income-generating activities and small grants" ~ "IGA and small grants",
+                                  TRUE ~ activity_new)) %>% 
+  mutate(strat_obj = case_when(activity_red %in% c("food distribution", "multi-purpose cash transfer") & 
+                          beneficiary_type == "Internally Displaced" ~ 
+                          "so_1", 
+                        activity_red %in% c("food distribution", "multi-purpose cash transfer") & 
+                          beneficiary_type != "Internally Displaced" ~ 
+                          "so_2", 
+                        TRUE ~ "so_3"))
+```
+
+```{r}
+fsc %>% filter(admin4_pcode == "MMR007008058")
+
+fsc %>% filter(location == "Du Yin Pin")
+```
+
+
+### scatterplots 
+
+```{r}
+
+ben_target <- fsc %>% 
+  group_by(admin3_pcode_old) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries),
+            partners = n_distinct(org_code)) %>% 
+  left_join(fs_pin, by = c("admin3_pcode_old" = "admin3_pcode")) %>% 
+  mutate(reached_pc = beneficiaries / fs_targeted,
+         reached_pc = ifelse(is.infinite(reached_pc), 1, reached_pc),
+         fs_targeted = ifelse(fs_targeted == 0 & beneficiaries > 0, 1, fs_targeted),
+         fs_targeted = round(fs_targeted, digits = 0)) %>% 
+  arrange(desc(reached_pc)) %>% 
+  select(state, township, fs_pin, fs_targeted, beneficiaries, reached_pc, partners) %>%
+  ggplot(aes(x = fs_targeted, y = beneficiaries, colour = partners, 
+             text = paste0(township, ",", "\n",
+                           state, ",", "\n",
+                           "beneficiaries: ", beneficiaries, "\n",
+                           "target: ", fs_targeted, "\n",
+                           "partners: ", partners))) + 
+  geom_abline(intercept = 0, slope = 1, lty = 2, colour = "red") + 
+  geom_point(aes(size = beneficiaries), alpha = 0.8) +
+  scale_size_continuous(guide = "none") + 
+  scale_x_continuous(trans = "log10", labels = comma) + 
+  scale_y_continuous(trans = "log10", labels = comma) +
+  scale_colour_viridis(direction = -1) +
+  labs(x = "Beneficiaries", y = "Targeted population", 
+       title = "Beneficiaries reached vs targeted population by township, Q1 2022",
+       subtitle = "The red line is 100% of target")
+
+ggplotly(ben_target, tooltip = c("text")) %>% 
+  config(displayModeBar = FALSE) %>% 
+  layout(title = list(text = paste0("Beneficiaries reached vs targeted population by township, Q1 2022",
+                                    "<br>",
+                                    "<sup>",
+                                    "The red line is 100% of target","</sup>")))
+
+```
+
+```{r}
+ben_target <- fsc %>% 
+  group_by(admin3_pcode_old) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries),
+            partners = n_distinct(org_code)) %>% 
+  left_join(fs_pin, by = c("admin3_pcode_old" = "admin3_pcode")) %>% 
+  mutate(reached_pc = beneficiaries / fs_targeted,
+         reached_pc = ifelse(is.infinite(reached_pc), 1, reached_pc),
+         fs_targeted = ifelse(fs_targeted == 0 & beneficiaries > 0, 1, fs_targeted),
+         fs_targeted = round(fs_targeted, digits = 0)) %>% 
+  arrange(desc(reached_pc)) %>% 
+  select(state, township, fs_pin, fs_targeted, beneficiaries, reached_pc, partners, group) %>%
+  ggplot(aes(x = fs_targeted, y = beneficiaries, colour = group, 
+             text = paste0(township, ",", "\n",
+                           state, ",", "\n",
+                           "beneficiaries: ", beneficiaries, "\n",
+                           "target: ", fs_targeted, "\n",
+                           "partners: ", partners, "\n",
+                           "group: ", group))) + 
+  geom_abline(intercept = 0, slope = 1, lty = 2, colour = "red") + 
+  geom_point(aes(size = beneficiaries), alpha = 0.8) +
+  scale_size_continuous(guide = "none") + 
+  scale_x_continuous(trans = "log10", labels = comma) + 
+  scale_y_continuous(trans = "log10", labels = comma) +
+  scale_colour_manual(values = c("#575C6DFF", "#00204DFF", "#C4B56CFF", "#FFEA46FF")) +
+  labs(x = "Beneficiaries", y = "Targeted population", 
+       title = "Beneficiaries reached per township vs targeted population by prioritisation group, Q1 2022",
+       subtitle = "The red line is 100% of target")
+
+ggplotly(ben_target, tooltip = c("text")) %>% 
+  config(displayModeBar = FALSE) %>% 
+  layout(title = list(text = paste0("Beneficiaries reached vs targeted population by township, Q1 2022",
+                                    "<br>",
+                                    "<sup>",
+                                    "The red line is 100% of target","</sup>")))
+```
+
+```{r}
+fsc %>% 
+  group_by(admin3_pcode_old) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries),
+            partners = n_distinct(org_code)) %>% 
+  right_join(fs_pin, by = c("admin3_pcode_old" = "admin3_pcode")) %>% 
+  replace_na(list(beneficiaries = 0)) %>% 
+  mutate(reached_pc = beneficiaries / fs_targeted,
+         reached_pc = ifelse(is.infinite(reached_pc), 1, reached_pc),
+         fs_targeted = ifelse(fs_targeted == 0 & beneficiaries > 0, 1, fs_targeted),
+         fs_targeted = round(fs_targeted, digits = 0)) %>% 
+  arrange(desc(reached_pc)) %>% 
+  group_by(group) %>% 
+  summarise(beneficiaries = sum(beneficiaries),
+            fs_targeted = sum(fs_targeted)) %>% 
+  mutate(pc_reached = round(beneficiaries / fs_targeted * 100, digits = 2), 
+         pc_beneficiaries = round(beneficiaries / sum(beneficiaries) * 100, digits = 2),
+         pc_target = round(fs_targeted / sum(fs_targeted) * 100, digits = 2)) %>% 
+  select(group, beneficiaries, `%_beneficiaries` = pc_beneficiaries, target = fs_targeted, 
+         `%_target` = pc_target, `%_reached` = pc_reached) %>% 
+  kable(caption = "2022 Q1 Beneficiaries and percent reached by prioritisation group", 
+        format.args = list(big.mark = ",")) %>% 
+  kable_classic_2("striped")
+```
+
+```{r}
+# fsc %>% write_csv("fsc_q1_2022.csv")
+```
+
+
+```{r}
+fsc %>% 
+  group_by(state, admin1_pcode) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries), .groups = "drop") %>% 
+  ungroup() %>% 
+  left_join(pin %>% group_by(admin1_pcode) %>% summarise(target = sum(fs_targeted, na.rm = TRUE)),
+            by = "admin1_pcode") %>% 
+  mutate(state = fct_reorder(state, -beneficiaries),
+         pc_reached = beneficiaries / target) %>%
+  arrange(desc(pc_reached)) %>% 
+  ggplot(aes(x = state, y = beneficiaries, fill = pc_reached)) + 
+  geom_col() +
+  geom_text(aes(label = comma(beneficiaries)), size = 2, vjust = -1) +
+  scale_y_continuous(labels = comma) +
+  scale_fill_viridis(labels = percent, direction = -1, option = "mako") +
+  theme(axis.text.x = element_text(angle = 30, vjust = 0.7)) +
+  labs(x = "", y = "Beneficiaries", fill = "% of\ntarget",
+       title = "Number of beneficiaries reached by state, Food Security Cluster",
+       subtitle = "and percentage of target reached") 
+
+# ggsave("by_state_q1_2022.png", dpi = 300, height = 5, width = 8, units = "in")
+```
+
+```{r}
+fsc %>% 
+  group_by(beneficiary_type) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries)) %>% 
+  mutate(beneficiary_type = fct_reorder(beneficiary_type, -beneficiaries)) %>% 
+  ggplot(aes(x = beneficiary_type, y = beneficiaries, fill = beneficiary_type)) + 
+  geom_col() +
+  geom_text(aes(label = comma(beneficiaries)), size = 3, vjust = -1) +
+  scale_y_continuous(labels = comma) +
+  scale_fill_discrete(guide = "none") +
+  labs(x = "Beneficiary type",
+       y = "Number of beneficiaries", 
+       subtitle = "Persons reached by beneficiary type, Food Security Cluster")
+
+# ggsave("beneficiary_type_q1_2022.png", dpi = 300, height = 5, width = 8, units = "in")
+```
+
+
+### activities
+
+```{r}
+fsc %>% 
+  mutate(delivery_modality = case_when(str_detect(delivery_modality, "Hybrid") ~ "Hybrid", 
+                                       str_detect(delivery_modality, "Service") ~ "Service delivery", 
+                                       TRUE ~ delivery_modality)) %>% 
+  group_by(activity_red, delivery_modality) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries)) %>% 
+  ggplot(aes(x = delivery_modality, y = beneficiaries, fill = activity_red)) + 
+  geom_col() +
+  scale_fill_discrete(guide = "none") +
+  scale_y_continuous(labels = comma) + 
+  facet_wrap(~ activity_red, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 30, vjust = 1, hjust = 0.8))
+
+
+```
+
+### cash
+
+
+```{r}
+fsc %>% filter(delivery_modality == "CBT/CVA") %>% 
+  mutate(reached_households = ifelse(is.na(reached_households), reached_beneficiaries / 5, reached_households)) %>% 
+  mutate(usd_per_hhd = total_value_usd / reached_households) %>% 
+  ggplot(aes(x = usd_per_hhd)) +
+  geom_histogram()
+  glimpse()
+
+  fsc %>% glimpse()
+  
+fsc %>% 
+  group_by(state) %>%
+  summarise_at(vars(child_male:elderly_female), ~ sum(., na.rm = TRUE))
+
+fsc %>% summarise(new_beneficiaries = sum(new_beneficiaries),
+                  reached_beneficiaries = sum(reached_beneficiaries)) %>% 
+  mutate(pc = new_beneficiaries / reached_beneficiaries)
+  
+
+  
+fsc %>% filter(beneficiary_type == "Internally Displaced") %>% 
+  summarise_at(vars(child_male:elderly_female), ~ sum(., na.rm = TRUE))
+
+fsc %>% count(beneficiary_type)
+
+
+fsc %>%  summarise(new_beneficiaries = sum(new_beneficiaries))
+
+fsc %>% 
+   filter(admin4_pcode != "MMR007008058") %>%  
+  summarise(new_beneficiaries = sum(new_beneficiaries))
+
+fsc %>% 
+  filter(is.na(admin4_pcode))
+
+
+```
+### disaggregation 
+
+```{r}
+fsc2 <- read_excel("C:/Users/seany/Downloads/R/not_for_sharing/2022_FSCMYA_5W_template_Q1 2022_IM Combined_draft_27042022_.xlsx", 
+           sheet = "FSC 5W Activities", skip = 4) %>% 
+  clean_names() %>%
+  filter(!is.na(month_of_implementation)) %>% 
+  rename_all(~str_replace_all(., "^number_of_", "")) %>%
+  rename_all(~str_replace_all(., "^number_", "")) %>%
+  rename(specify_location = specify_location_if_the_the_location_is_not_in_the_list) %>% 
+  mutate(idp_camp_site_name= as.character(idp_camp_site_name)) %>% 
+  mutate(location = case_when(!is.na(idp_camp_site_name) ~ idp_camp_site_name,
+                              !is.na(village_ward) ~ village_ward,
+                              !is.na(specify_location) ~ specify_location,
+                              !is.na(village_tract_town) ~ village_tract_town)) %>%
+  mutate(date = my(month_of_implementation)) %>% 
+  rename(activity = fsc_main_activity) %>% 
+  mutate(township = recode(township, "Putao" = "Puta-O"), 
+         admin3_pcode = ifelse(township == "Puta-O", "MMR001014", admin3_pcode)) %>% 
+  mutate(total_value_usd = case_when(currency == "MMK" ~ total_value / 1776, 
+                                     currency == "USD" ~ total_value)) %>% 
+  rename(state = state_region) %>% 
+  mutate(admin3_pcode_old = case_when(admin3_pcode %in% c("MMR013046", "MMR013047") ~ "MMR013008", 
+                                  admin3_pcode == "MMR015202" ~ "MMR015022",
+                                  admin3_pcode == "MMR015315" ~ "MMR015010", 
+                                  admin3_pcode == "MMR015312" ~ "MMR015006",	
+                                  admin3_pcode == "MMR015308" ~ "MMR015007",
+                                  admin3_pcode == "MMR016321" ~ "MMR016003", 
+                                  TRUE ~ admin3_pcode)) %>% 
+  replace_na(list(new_beneficiaries = 0)) %>% 
+  mutate(activity_red = case_when(activity %in% c("food distributions (in kind/voucher/cash), moderate", 
+                                                  "food distributions (in kind/voucher/cash), severe") ~ 
+                                    "food distribution",
+                                  activity %in% c("multi-purpose cash transfer (MPC), moderate",
+                                                  "multi-purpose cash transfer (MPC), severe") ~ 
+                                    "multi-purpose cash transfer",
+                                  TRUE ~ activity)) %>% 
+  mutate(so = case_when(activity_red %in% c("food distribution", "multi-purpose cash transfer") & 
+                          beneficiary_type == "Internally Displaced" ~ 
+                          "so_1", 
+                        activity_red %in% c("food distribution", "multi-purpose cash transfer") & 
+                          beneficiary_type != "Internally Displaced" ~ 
+                          "so_2", 
+                        TRUE ~ "so_3"))
+```
+
+
+```{r}
+fsc2 %>% 
+  group_by(so) %>% 
+  summarise(new_beneficiaries = sum(new_beneficiaries),
+            reached_beneficiaries = sum(reached_beneficiaries)) %>% 
+  mutate(pc = new_beneficiaries / reached_beneficiaries)
+
+fsc2 %>% 
+  group_by(so, state) %>%
+  summarise_at(vars(child_male:elderly_female), ~ sum(., na.rm = TRUE)) %>% 
+  mutate(male = child_male + adult_male + elderly_male,
+         female = child_female + adult_female + elderly_female, 
+         children = child_male + child_female, 
+         adults = adult_male + adult_female, 
+         elderly = elderly_male + elderly_female) %>% 
+  select(-c(child_male:elderly_female)) %>%
+  mutate_at(vars(male:elderly), ~ case_when(so == "so_1" ~ . * 0.4931810,
+                                                        so == "so_2" ~ . * 0.8458814,
+                                                        so == "so_3" ~ . * 0.9686332)) %>%
+  group_by(so) %>% 
+  # ungroup() %>% 
+  summarise_at(vars(male:elderly), ~ sum(.))
+
+```
+
+
+```{r}
+fsc %>% filter(activity %in%  c("food distributions (in kind/voucher/cash), severe", 
+                                "food distributions (in kind/voucher/cash), moderate")) %>% 
+  group_by(activity, food_insecurity_status) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries))
+
+fsc %>% 
+  filter(food_insecurity_status == "Severely food insecure") %>% 
+  count(evidence)
+
+fsc %>% 
+  filter(food_insecurity_status == "Moderately food insecure") %>% 
+  count(evidence)
+
+fsc %>% count(evidence, wt = new_beneficiaries) %>% 
+  rename(beneficiaries = n) %>% 
+  mutate(evidence = ifelse(str_detect(evidence, "food consumption"), "food consumption score", evidence),
+         pc = beneficiaries / sum(beneficiaries))
+
+fsc %>% 
+  count(food_insecurity_status, wt = new_beneficiaries) %>% 
+  rename(beneficiaries = n) %>% 
+  mutate(pc = round(beneficiaries / sum(beneficiaries) * 100, digits = 2))
+```
+
+```{r}
+fsc %>% 
+  mutate(activity_red = case_when(activity %in% c("food distributions (in kind/voucher/cash), moderate", 
+                                                  "food distributions (in kind/voucher/cash), severe") ~ 
+                                    "food distribution"
+                                  activity %in% c("multi-purpose cash transfer (MPC), moderate",
+                                                  "multi-purpose cash transfer (MPC), severe") ~ 
+                                    "multi-purpose cash transfer",
+                                  TRUE ~ activity))
+  count(activity)
+```
+
+
+
+```{r}
+fsc %>% filter(township == "Dala") %>% count(donor)
+
+fsc %>% filter(reporting_organization == "World Food Programme") %>% 
+  count(donor)
+
+fsc %>% filter(state == "Yangon") %>% 
+  count(township, implementing_partner, reporting_organization)
+
+fsc %>% filter(township == "Dala") %>% 
+  count(donor)
+  count(activity)
+  count(implementing_partner, location)
+  
+pin %>% mutate(target_pc = fs_targeted / fs_pin) %>% 
+  arrange(target_pc) %>% 
+  select(state, township, target_pc)
+
+
+```
+
+
+```{r}
+fsc %>%
+  ggplot(aes(x = state, y = reached_beneficiaries)) + 
+  geom_col()
+
+fsc %>% filter(state == "Yangon") %>% 
+  count(township, wt = reached_beneficiaries)
+```
+
+### matching with 2021 results
+
+```{r}
+fsc %>% count(activity_red) %>% pull(activity_red)
+```
+
+```{r}
+fsc_2021 %>% count(activity_red)
+```
+
+```{r}
+fsc %>% 
+  group_by(date, activity_red) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries)) %>% 
+  rbind(fsc_2021 %>% 
+          filter(unique_beneficiaries == "Yes") %>%
+          group_by(date, activity_red) %>% 
+          summarise(beneficiaries = sum(beneficiaries))) %>% 
+  group_by(activity_red) %>% 
+  arrange(date) %>% 
+  mutate(cum_ben = cumsum(beneficiaries)) %>% 
+  mutate(activity_red = str_replace_all(activity_red, "provision of ", "")) %>%
+  ggplot(aes(x = date, y = cum_ben, colour = activity_red)) +
+  geom_line(size = 0.7) +
+  geom_vline(colour = "grey50", lty = 2, xintercept = as.numeric(as.Date("2022-01-01"))) +
+  geom_vline(colour = "grey50", lty = 2, xintercept = as.numeric(as.Date("2021-06-01"))) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~ activity_red, scales = "free_y") +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 5)) + # see if this works when you knit, then do it for the other plots 
+  labs(x = "Month", 
+       y = "Cumulative beneficiaries", 
+       title = "Monthly progress by activity, 2021",
+       subtitle = "Figures are in cumulative unique beneficiaries reached") + 
+  theme(plot.title = element_text(size = 12))
+  
+
+```
+
+```{r}
+fsc %>% 
+  filter(activity == "provision of kitchen garden kits")
+
+fsc %>% count(activity_red)
+```
+
+### monetary values
+
+```{r}
+
+fsc %>%
+  filter(!is.na(usd_per_hhd) & !is.na(new_beneficiaries)) %>% 
+  filter(delivery_modality %in% c("CBT/CVA", "Hybrid (In-kind & CBT/CVA)")) %>%
+  group_by(usd_hhd_bin) %>% 
+  summarise(households = sum(reached_households)) %>% 
+  mutate(`%_of_hhd` = round(households / sum(households) * 100, digits = 2)) %>% 
+  ggplot(aes(x = usd_hhd_bin, y = households, fill = usd_hhd_bin)) + 
+  geom_col() + 
+  geom_text(aes(label = `%_of_hhd`), vjust = -0.4, size = 3) + 
+  scale_fill_viridis_d(option = "mako", direction = -1) + 
+  scale_y_continuous(labels = comma, breaks = seq(0, 80000, by = 10000)) + 
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 30, hjust = 0.8, vjust = 0.9)) +
+  labs(x = "USD value of cash transfer per household per month",
+       y = "Number of households",
+       title = "Number of households by value of cash transfer per household (2022 1Q)",
+       subtitle = "Figures at the top of each bar show percentage of households\nOnly households reached through the cash, hybrid or voucher modalities are included")
+  
+
+```
+
+
+```{r table-usd-values-activity}
+avg_transfer_value <- fsc %>%
+  filter(delivery_modality %in% c("CBT/CVA", "Hybrid (In-kind & CBT/CVA)")) %>%
+  group_by(activity_red) %>% 
+  summarise(hhd_frequencies = round(sum(reached_households, na.rm = TRUE)),
+            total_value_usd = round(sum(total_value_usd, na.rm = TRUE))) %>% 
+  mutate(avg_transfer_value = round(total_value_usd / hhd_frequencies, digits = 2)) %>% 
+  rename(activity = activity_red) %>% 
+  arrange(desc(avg_transfer_value)) 
+
+avg_transfer_value %>%  
+  kable(caption = "Average value (USD) of household package values per activity", 
+        format.args = list(big.mark = ",")) %>% 
+  kable_classic_2(lightable_options = "striped") %>% 
+  column_spec(4, color = "white", background = spec_color(avg_transfer_value$avg_transfer_value[1:7], end = 0.8, direction = -1)) %>%
+  footnote(general = "Only households which were reached by cash, hybrid or voucher modalities are included", 
+           general_title = "")
+# pander(caption = "Average value (USD) of household package values per activity")
+
+```
+
+
+```{r}
+partner_mean_usd <- function(tbl, name){
+
+  tbl %>% 
+    filter(!is.na(new_beneficiaries) & !is.na(usd_per_hhd)) %>%
+    filter(delivery_modality %in% c("CBT/CVA", "Hybrid (In-kind & CBT/CVA)")) %>%
+    filter(activity_red == {{name}}) %>%
+    mutate(reached_households = ifelse(activity_red == "food distribution", 
+                                       reached_beneficiaries, 
+                                       reached_households)) %>% 
+    group_by(partner_code) %>% 
+    summarise(total_value_usd = sum(total_value_usd),
+              beneficiaries = sum(new_beneficiaries), 
+              households = sum(reached_households)) %>% 
+    mutate(mean_usd = total_value_usd / households) %>% 
+    arrange(desc(beneficiaries)) %>%  
+    top_n(5) %>% 
+    mutate(partner_code = fct_reorder(partner_code, beneficiaries)) %>% 
+    ggplot(aes(x = mean_usd, y = partner_code, fill = beneficiaries)) + 
+    scale_x_continuous(labels = comma_format(accuracy = 1)) + 
+    scale_fill_viridis(option = "mako", direction = -1, begin = 0.2) +
+    geom_col() +
+    geom_text(aes(label = dollar(mean_usd)), size = 2, hjust = "inward") + 
+    theme(axis.text.y = element_text(size = 7)) +
+  labs(x = "Average USD value of package per transfer", 
+       y = "", 
+       title = paste0({{name}})) +
+    theme(legend.title = element_text(size = 3.5), 
+               legend.text = element_text(size = 3.5))
+}
+
+fsc %>% partner_mean_usd("food distribution") +
+  labs(title = "Food distributions") +
+fsc %>% partner_mean_usd("food_cash for work_assets") + 
+  labs(title = "Food/cash for work/assets") + 
+fsc %>% partner_mean_usd("multi-purpose cash transfer") +
+  labs(title = "Multi-purpose cash transfer") + 
+fsc %>% partner_mean_usd("IGA and small grants") +
+  labs(title = "IGA and small grants")
+  
+
+fsc %>% count(activity_red)
+fsc %>% filter(activity_red == "IGA and small grants" & is.na(reached_households))
+
+```
+
+# what is going on with the food distributions?
+
+```{r}
+
+fsc %>%
+  filter(activity_red == "food distribution") %>% 
+  filter(!is.na(usd_per_hhd) & !is.na(new_beneficiaries)) %>% 
+  group_by(usd_hhd_bin) %>% 
+  summarise(beneficiaries = sum(reached_beneficiaries)) %>% 
+  mutate(`%_of_ben` = round(beneficiaries / sum(beneficiaries) * 100, digits = 2)) %>% 
+  ggplot(aes(x = usd_hhd_bin, y = beneficiaries, fill = usd_hhd_bin)) + 
+  geom_col() + 
+  geom_text(aes(label = `%_of_ben`), vjust = -0.4, size = 3) + 
+  scale_fill_viridis_d(option = "mako", direction = -1) + 
+  scale_y_continuous(labels = comma, breaks = seq(0, 160000, by = 20000)) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 30, hjust = 0.8, vjust = 0.9)) +
+  labs(x = "USD value of food distributions per month",
+       y = "Number of households",
+       title = "USD value of food distributions per household (2022 1Q)",
+       subtitle = "Figures at the top of each bar show percentage of households")
+
+fsc %>% 
+  filter(activity_red == "food distribution") %>% 
+  filter(!is.na(usd_per_hhd) & !is.na(new_beneficiaries)) %>%
+  ggplot(aes(x = usd_per_person)) + 
+  geom_histogram()
+
+fsc %>%
+  filter(!is.na(total_value_usd)) %>% 
+  mutate(usd_person_bin = case_when(usd_per_person < 2 ~ "<$2",
+                                 usd_per_person >= 2 & usd_per_person < 4 ~ ">=$2_<$4",
+                                 usd_per_person >= 4 & usd_per_person < 6 ~ ">=$4_<$6",
+                                 usd_per_person >= 6 & usd_per_person < 8 ~ ">=$6_<$8",
+                                 usd_per_person >= 8 & usd_per_person < 10 ~ ">=$8_<$10",
+                                 usd_per_person >= 10 & usd_per_person < 12 ~ ">=$10_<$12",
+                                 usd_per_person >= 12 & usd_per_person < 14 ~ ">=$12_<$14",
+                                 usd_per_person >= 14 & usd_per_person < 16 ~ ">=$14_<$16",
+                                 usd_per_person >= 16 & usd_per_person < 18 ~ ">=$16_<$18",
+                                 usd_per_person >= 18 & usd_per_person < 20 ~ ">=$18_<$20",
+                                 usd_per_person >= 20 ~ ">=$20",
+                     TRUE ~ NA_character_), 
+         usd_person_bin = fct_relevel(usd_person_bin, c("<$2", ">=$2_<$4", ">=$4_<$6", ">=$6_<$8", ">=$8_<$10",">=$10_<$12", 
+                                                  ">=$12_<$14", ">=$14_<$16", ">=$16_<$18", ">=$18_<$20",">=20"))) %>% 
+  ggplot(aes(x = new_beneficiaries, y = usd_person_bin)) + 
+  geom_col() + 
+  scale_x_continuous(breaks = seq(0, 140000, by = 20000))
+```
+
+```{r}
+fsc %>% 
+  filter(!is.na(new_beneficiaries) & !is.na(total_value_usd) &
+           activity_red == "food distribution") %>% 
+  filter(state == "Kayah")
+  ggplot(aes(x = usd_per_hhd)) +
+  geom_histogram()
+  group_by(state) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries),
+            total_value_usd = sum(total_value_usd),
+            mode = mode(usd_per_hhd),
+            min = min(usd_per_hhd),
+            max = max(usd_per_hhd)) %>% 
+  mutate(mean_usd = total_value_usd / beneficiaries) %>% 
+  arrange(desc(mean_usd))
+  
+fsc %>% 
+  filter(!is.na(new_beneficiaries) & !is.na(total_value_usd) &
+           activity_red == "food distribution") %>% 
+  group_by(partner_code) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries),
+            total_value_usd = sum(total_value_usd),
+            rows = n(), 
+            mode = mode(usd_per_hhd)) %>% 
+  mutate(mean_usd = total_value_usd / beneficiaries) %>% 
+  arrange(mean_usd)
+```
+
+
+
+```{r}
+fsc %>% count(activity_red)
+```
+
+```{r}
+fsc %>% filter(activity_red == "food distribution" & !is.na(usd_per_hhd)) %>% 
+  ggplot(aes(x = usd_per_person, y = new_beneficiaries)) + 
+  geom_point() +
+  scale_x_log10()
+```
+
+
+```{r table-meb-usd-hhd-bin}
+cbt_bins <- fsc %>% filter(activity_red %in% c("food distribution", "multi-purpose cash transfer") &
+                             !is.na(usd_per_hhd) &
+                             !is.na(new_beneficiaries)) %>%
+  count(usd_hhd_bin, wt = reached_households) %>% 
+  mutate(pc_of_total = round(n / sum(n) * 100, digits = 2))
+
+fsc %>% 
+  filter(activity_red %in% c("food distribution", "multi-purpose cash transfer") &
+                             !is.na(usd_per_hhd) &
+                             !is.na(new_beneficiaries)) %>%
+  mutate(pc_meb = usd_per_hhd / 114.55) %>% 
+  group_by(usd_hhd_bin) %>% 
+  summarise(avg_pc_of_meb = round(median(pc_meb) * 100, digits = 2),
+            avg_usd_month = round(median(usd_per_hhd, na.rm = TRUE), digits = 2),
+            households = round(sum(reached_households))) %>% 
+  mutate(pc_of_hhd = round(households / sum(households) * 100, digits = 2)) %>% 
+  kable(caption = "Monthly cash-based transfer values by percentage of MEB received", format.args = list(big.mark = ",")) %>% 
+  kable_classic_2("striped") %>% 
+  column_spec(5, color = "white", background = spec_color(cbt_bins$pc_of_total[1:11], end = 0.9, direction = -1)) %>%
+  footnote(general = "Only households reached through monthly cash-based transfers are included",
+           general_title = "")
+# pander(caption = "Monthly cash-based transfer values by percentage of MEB received")
+
+```
+
+
+

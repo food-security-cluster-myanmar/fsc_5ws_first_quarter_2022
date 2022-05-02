@@ -1,0 +1,78 @@
+"0","fsc <- read_csv(""fsc_codes.csv"") %>% 
+  rename_all(~str_replace_all(., ""^number_of_"", """")) %>%
+  rename_all(~str_replace_all(., ""^number_"", """")) %>%
+  rename(specify_location = specify_location_if_the_the_location_is_not_in_the_list) %>% 
+  mutate(idp_camp_site_name= as.character(idp_camp_site_name)) %>% 
+  mutate(location = case_when(!is.na(idp_camp_site_name) ~ idp_camp_site_name,
+                              !is.na(village_ward) ~ village_ward,
+                              !is.na(specify_location) ~ specify_location,
+                              !is.na(village_tract_town) ~ village_tract_town)) %>%
+  mutate(date = my(month_of_implementation)) %>% 
+  rename(activity = fsc_main_activity) %>% 
+  mutate(township = recode(township, ""Putao"" = ""Puta-O""), 
+         admin3_pcode = ifelse(township == ""Puta-O"", ""MMR001014"", admin3_pcode)) %>% 
+  left_join(pcode4 %>% select(township, vt_town, admin3_pcode, admin4_pcode, admin1_pcode), by = 
+              c(""village_tract_town"" = ""vt_town"", ""township"" = ""township"", 
+                ""admin3_pcode"" = ""admin3_pcode"", ""admin1_pcode"" = ""admin1_pcode"")) %>% 
+  mutate(total_value_usd = case_when(currency == ""MMK"" ~ total_value / 1776, 
+                                     currency == ""USD"" ~ total_value)) %>% 
+  rename(state = state_region) %>% 
+  mutate(admin3_pcode_old = case_when(admin3_pcode %in% c(""MMR013046"", ""MMR013047"") ~ ""MMR013008"", 
+                                  admin3_pcode == ""MMR015202"" ~ ""MMR015022"",
+                                  admin3_pcode == ""MMR015315"" ~ ""MMR015010"", 
+                                  admin3_pcode == ""MMR015312"" ~ ""MMR015006"",	
+                                  admin3_pcode == ""MMR015308"" ~ ""MMR015007"",
+                                  admin3_pcode == ""MMR016321"" ~ ""MMR016003"", 
+                                  TRUE ~ admin3_pcode)) %>% 
+  # removing a duplicate entry from the left join 
+  filter(admin4_pcode != ""MMR007008058"") %>% 
+  replace_na(list(new_beneficiaries = 0)) %>% 
+  mutate(activity_red = case_when(activity %in% c(""food distributions (in kind/voucher/cash), moderate"", 
+                                                  ""food distributions (in kind/voucher/cash), severe"") ~ 
+                                    ""food distribution"",
+                                  activity %in% c(""multi-purpose cash transfer (MPC), moderate"",
+                                                  ""multi-purpose cash transfer (MPC), severe"") ~ 
+                                    ""multi-purpose cash transfer"",
+                                  activity == ""livelihoods vocational training"" ~ ""vocational training"",
+                                  activity == ""food/cash for work/assets"" ~ ""food_cash for work_assets"",
+                                  activity == ""income-generating activities and small grants"" ~ ""IGA and small grants"", 
+                                  TRUE ~ activity)) %>% 
+  mutate(strat_obj = case_when(activity_red %in% c(""food distribution"", ""multi-purpose cash transfer"") & 
+                          beneficiary_type == ""Internally Displaced"" ~ 
+                          ""so_1"", 
+                        activity_red %in% c(""food distribution"", ""multi-purpose cash transfer"") & 
+                          beneficiary_type != ""Internally Displaced"" ~ 
+                          ""so_2"", 
+                        TRUE ~ ""so_3"")) %>% 
+   # these partners did not provide the numbers of reached_households
+  mutate(reached_households = ifelse(is.na(reached_households), reached_beneficiaries, reached_households)) %>% 
+  mutate(usd_per_hhd = total_value_usd / reached_households, 
+         usd_per_person = total_value_usd / reached_beneficiaries) %>% 
+  mutate(usd_hhd_bin = case_when(usd_per_hhd < 10 ~ ""<$10"",
+                     usd_per_hhd >= 10 & usd_per_hhd < 20 ~ "">=$10_<$20"",
+                     usd_per_hhd >= 20 & usd_per_hhd < 30 ~ "">=$20_<$30"",
+                     usd_per_hhd >= 30 & usd_per_hhd < 40 ~ "">=$30_<$40"",
+                     usd_per_hhd >= 40 & usd_per_hhd < 50 ~ "">=$40_<$50"",
+                     usd_per_hhd >= 50 & usd_per_hhd < 60 ~ "">=$50_<$60"",
+                     usd_per_hhd >= 60 & usd_per_hhd < 70 ~ "">=$60_<$70"",
+                     usd_per_hhd >= 70 & usd_per_hhd < 80 ~ "">=$70_<$80"",
+                     usd_per_hhd >= 80 & usd_per_hhd < 90 ~ "">=$80_<$90"",
+                     usd_per_hhd >= 90 & usd_per_hhd < 100 ~ "">=$90_<$100"",
+                     usd_per_hhd >= 100 ~ "">=$100"",
+                     TRUE ~ NA_character_),
+         usd_hhd_bin = fct_relevel(usd_hhd_bin, c(""<$10"", "">=$10_<$20"", "">=$20_<$30"", "">=$30_<$40"", "">=$40_<$50"","">=$50_<$60"", 
+                                                  "">=$60_<$70"", "">=$70_<$80"", "">=$80_<$90"","">=$90_<$100"","">=$100""))) %>% 
+  rename(partner_code = org_code) 
+"
+"2","[1mRows: [22m[34m2116[39m [1mColumns: [22m[34m60[39m
+"
+"2","[36m--[39m [1mColumn specification[22m [36m------------------------------------------------------------------------------------------------------[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m (42): month_of_implementation, donor, reporting_organization_type, implementing_partner_type, state_region, township, ...
+[32mdbl[39m (17): quantity, total_value, value_per_household, value_per_individual, value_per_household_usd, number_child_male, nu...
+[33mlgl[39m  (1): admin2_pcode
+"
+"2","
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m to retrieve the full column specification for this data.
+[36mi[39m Specify the column types or set [38;5;235m[48;5;253m[38;5;235m[48;5;253m`show_col_types = FALSE`[48;5;253m[38;5;235m[49m[39m to quiet this message.
+"

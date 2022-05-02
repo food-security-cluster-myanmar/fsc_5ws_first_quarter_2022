@@ -1,0 +1,82 @@
+"0","glimpse(fsc)
+"
+"1","Rows: 1,502"
+"1",""
+"1","
+"
+"1","Columns: 69"
+"1",""
+"1","
+"
+"1","$ month_of_implementation                [3m[38;5;246m<chr>[39m[23m ""March 2022"", ""March 2022"", ""March 2022"", ""March 2022"", ""March 2022"", ""Ma~
+$ donor                                  [3m[38;5;246m<chr>[39m[23m ""CERF"", ""CERF"", ""CERF"", ""CERF"", ""CERF"", ""CERF"", ""CERF"", ""CERF"", ""CERF"", ""~
+$ reporting_organization_type            [3m[38;5;246m<chr>[39m[23m ""UN agency"", ""UN agency"", ""UN agency"", ""UN agency"", ""UN agency"", ""UN agen~
+$ implementing_partner_type              [3m[38;5;246m<chr>[39m[23m ""NNGO"", ""NNGO"", ""NNGO"", ""NNGO"", ""NNGO"", ""NNGO"", ""NNGO"", ""NNGO"", ""NNGO"", ""~
+$ state                                  [3m[38;5;246m<chr>[39m[23m ""Chin"", ""Chin"", ""Chin"", ""Chin"", ""Chin"", ""Chin"", ""Chin"", ""Chin"", ""Chin"", ""~
+$ township                               [3m[38;5;246m<chr>[39m[23m ""Mindat"", ""Mindat"", ""Mindat"", ""Mindat"", ""Mindat"", ""Mindat"", ""Mindat"", ""Mi~
+$ village_tract_town                     [3m[38;5;246m<chr>[39m[23m ""Hpwi"", ""Khawilung"", ""Khawilung"", ""Khawilung"", ""Kihta"", ""Lailawnghtui"", ""~
+$ village_ward                           [3m[38;5;246m<chr>[39m[23m ""Am Laung"", ""Khawilung"", ""Loke Shel"", ""Shit Hmway"", ""M'hto"", ""Shet"", ""Yay~
+$ idp_camp_site_name                     [3m[38;5;246m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ specify_location                       [3m[38;5;246m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ location_combined                      [3m[38;5;246m<chr>[39m[23m ""HpwiAm Laungprovision of crop, vegetable and seed kits"", ""KhawilungKhawi~
+$ location_type                          [3m[38;5;246m<chr>[39m[23m ""Village"", ""Village"", ""Village"", ""Village"", ""Village"", ""Village"", ""Villag~
+$ rural_or_urban                         [3m[38;5;246m<chr>[39m[23m ""Rural"", ""Rural"", ""Rural"", ""Rural"", ""Rural"", ""Rural"", ""Rural"", ""Rural"", ""~
+$ humanitarian_or_development            [3m[38;5;246m<chr>[39m[23m ""Humanitarian"", ""Humanitarian"", ""Humanitarian"", ""Humanitarian"", ""Humanita~
+$ response_plan_if_project_under_fts     [3m[38;5;246m<chr>[39m[23m ""HRP"", ""HRP"", ""HRP"", ""HRP"", ""HRP"", ""HRP"", ""HRP"", ""HRP"", ""HRP"", ""HRP"", ""HR~
+$ project_code                           [3m[38;5;246m<chr>[39m[23m ""OSRO/MYA/104/CHA"", ""OSRO/MYA/104/CHA"", ""OSRO/MYA/104/CHA"", ""OSRO/MYA/104~
+$ activity                               [3m[38;5;246m<chr>[39m[23m ""provision of crop, vegetable and seed kits"", ""provision of crop, vegetab~
+$ activity_description                   [3m[38;5;246m<chr>[39m[23m ""Agri inputs ( 100 g for 5 types of vegetable seeds, 500 g of Waxy Corn, ~
+$ was_nutrition_mainstreamed_in_activity [3m[38;5;246m<chr>[39m[23m ""Yes"", ""Yes"", ""Yes"", ""Yes"", ""Yes"", ""Yes"", ""Yes"", ""Yes"", ""Yes"", ""Yes"", ""Ye~
+$ fsc_objectives                         [3m[38;5;246m<chr>[39m[23m ""Objective 3: Restore, protect and improve livelihoods and resilience of ~
+$ hrp_indicator                          [3m[38;5;246m<chr>[39m[23m ""Number of vulnerable, non-displaced stateless and returned/resettled/loc~
+$ activity_status                        [3m[38;5;246m<chr>[39m[23m ""Completed"", ""Completed"", ""Completed"", ""Completed"", ""Completed"", ""Complet~
+$ conditionality                         [3m[38;5;246m<chr>[39m[23m ""Unconditional"", ""Unconditional"", ""Unconditional"", ""Unconditional"", ""Unco~
+$ frequency                              [3m[38;5;246m<chr>[39m[23m ""One-off"", ""One-off"", ""One-off"", ""One-off"", ""One-off"", ""One-off"", ""One-of~
+$ delivery_modality                      [3m[38;5;246m<chr>[39m[23m ""In-kind"", ""In-kind"", ""In-kind"", ""In-kind"", ""In-kind"", ""In-kind"", ""In-kin~
+$ type_of_in_kind_assistance             [3m[38;5;246m<chr>[39m[23m ""Agricultural inputs"", ""Agricultural inputs"", ""Agricultural inputs"", ""Agr~
+$ unit                                   [3m[38;5;246m<chr>[39m[23m ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""Kg"", ""~
+$ quantity                               [3m[38;5;246m<dbl>[39m[23m 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6~
+$ total_value                            [3m[38;5;246m<dbl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 27880~
+$ value_per_household                    [3m[38;5;246m<dbl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 17000~
+$ value_per_individual                   [3m[38;5;246m<dbl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ currency                               [3m[38;5;246m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ""MMK""~
+$ value_per_household_usd                [3m[38;5;246m<dbl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 95.72~
+$ cash_delivery_mechanism                [3m[38;5;246m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ""Mone~
+$ food_insecurity_status                 [3m[38;5;246m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ""Mode~
+$ food_security_indicator_used           [3m[38;5;246m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ evidence                               [3m[38;5;246m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ beneficiary_type                       [3m[38;5;246m<chr>[39m[23m ""Host/local Community"", ""Host/local Community"", ""Host/local Community"", ""~
+$ child_male                             [3m[38;5;246m<dbl>[39m[23m 49, 53, 26, 50, 36, 44, 58, 21, 150, 61, 95, 47, 83, 93, 20, 61, 81, 106,~
+$ child_female                           [3m[38;5;246m<dbl>[39m[23m 35, 65, 20, 50, 44, 27, 47, 41, 122, 58, 112, 29, 82, 88, 15, 74, 55, 99,~
+$ adult_male                             [3m[38;5;246m<dbl>[39m[23m 34, 66, 34, 63, 26, 47, 30, 25, 104, 70, 136, 62, 85, 88, 24, 63, 109, 19~
+$ adult_female                           [3m[38;5;246m<dbl>[39m[23m 42, 81, 37, 62, 17, 42, 27, 32, 105, 67, 131, 52, 97, 98, 16, 59, 108, 23~
+$ elderly_male                           [3m[38;5;246m<dbl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ elderly_female                         [3m[38;5;246m<dbl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ reached_households                     [3m[38;5;246m<dbl>[39m[23m 29, 29, 16, 21, 27, 35, 40, 18, 59, 47, 57, 23, 42, 52, 17, 51, 37, 164, ~
+$ reached_beneficiaries                  [3m[38;5;246m<dbl>[39m[23m 160, 265, 117, 225, 123, 160, 162, 119, 481, 256, 474, 190, 347, 367, 75,~
+$ new_beneficiaries                      [3m[38;5;246m<dbl>[39m[23m 160, 265, 117, 225, 123, 160, 162, 119, 481, 256, 474, 190, 347, 367, 75,~
+$ people_with_disability_male            [3m[38;5;246m<dbl>[39m[23m 5, 0, 3, 6, 3, 4, 2, 1, 0, 7, 6, 4, 12, 4, 3, 9, 4, 32, 23, 37, 3, 0, 2, ~
+$ people_with_disability_female          [3m[38;5;246m<dbl>[39m[23m 1, 3, 1, 1, 2, 3, 2, 0, 9, 4, 5, 4, 15, 2, 4, 11, 2, 34, 27, 49, 3, 0, 1,~
+$ total_number_of_people_with_disability [3m[38;5;246m<dbl>[39m[23m 6, 3, 4, 7, 5, 7, 4, 1, 9, 11, 11, 8, 27, 6, 7, 20, 6, 66, 50, 86, 6, 0, ~
+$ comments                               [3m[38;5;246m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ cluster_name                           [3m[38;5;246m<chr>[39m[23m ""FSL"", ""FSL"", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,~
+$ country                                [3m[38;5;246m<chr>[39m[23m ""SSD"", ""SSD"", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,~
+$ admin1_pcode                           [3m[38;5;246m<chr>[39m[23m ""MMR004"", ""MMR004"", ""MMR004"", ""MMR004"", ""MMR004"", ""MMR004"", ""MMR004"", ""MM~
+$ admin2_pcode                           [3m[38;5;246m<lgl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N~
+$ admin3_pcode                           [3m[38;5;246m<chr>[39m[23m ""MMR004006"", ""MMR004006"", ""MMR004006"", ""MMR004006"", ""MMR004006"", ""MMR0040~
+$ adm1_3                                 [3m[38;5;246m<chr>[39m[23m ""Chin-Mindat"", ""Chin-Mindat"", ""Chin-Mindat"", ""Chin-Mindat"", ""Chin-Mindat""~
+$ adm3_4                                 [3m[38;5;246m<chr>[39m[23m ""Mindat-Hpwi"", ""Mindat-Khawilung"", ""Mindat-Khawilung"", ""Mindat-Khawilung""~
+$ partner_code                           [3m[38;5;246m<chr>[39m[23m ""org_6130"", ""org_6130"", ""org_6130"", ""org_6130"", ""org_6130"", ""org_6130"", ""~
+$ report_org_code                        [3m[38;5;246m<chr>[39m[23m ""org_8415"", ""org_8415"", ""org_8415"", ""org_8415"", ""org_8415"", ""org_8415"", ""~
+$ location                               [3m[38;5;246m<chr>[39m[23m ""Am Laung"", ""Khawilung"", ""Loke Shel"", ""Shit Hmway"", ""M'hto"", ""Shet"", ""Yay~
+$ date                                   [3m[38;5;246m<date>[39m[23m 2022-03-01, 2022-03-01, 2022-03-01, 2022-03-01, 2022-03-01, 2022-03-01, ~
+$ admin4_pcode                           [3m[38;5;246m<chr>[39m[23m ""MMR004006020"", ""MMR004006012"", ""MMR004006012"", ""MMR004006012"", ""MMR00400~
+$ total_value_usd                        [3m[38;5;246m<dbl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 15698~
+$ admin3_pcode_old                       [3m[38;5;246m<chr>[39m[23m ""MMR004006"", ""MMR004006"", ""MMR004006"", ""MMR004006"", ""MMR004006"", ""MMR0040~
+$ activity_red                           [3m[38;5;246m<chr>[39m[23m ""provision of crop, vegetable and seed kits"", ""provision of crop, vegetab~
+$ strat_obj                              [3m[38;5;246m<chr>[39m[23m ""so_3"", ""so_3"", ""so_3"", ""so_3"", ""so_3"", ""so_3"", ""so_3"", ""so_3"", ""so_3"", ""~
+$ usd_per_hhd                            [3m[38;5;246m<dbl>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 95.72~
+$ usd_hhd_bin                            [3m[38;5;246m<fct>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, >=$90~"
+"1",""
+"1","
+"

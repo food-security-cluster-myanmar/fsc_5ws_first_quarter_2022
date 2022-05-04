@@ -1,0 +1,31 @@
+"0","fsc %>% 
+  group_by(date, activity_red) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries)) %>% 
+  rbind(fsc_2021 %>% 
+          filter(unique_beneficiaries == ""Yes"") %>%
+          group_by(date, activity_red) %>% 
+          summarise(beneficiaries = sum(beneficiaries))) %>% 
+  group_by(activity_red) %>% 
+  arrange(date) %>% 
+  mutate(cum_ben = cumsum(beneficiaries)) %>% 
+  arrange(activity_red) %>% 
+  mutate(activity_red = str_replace_all(activity_red, ""provision of "", """")) %>%
+  ggplot(aes(x = date, y = cum_ben, colour = activity_red)) +
+  geom_vline(colour = ""red"", lty = 2, xintercept = as.numeric(as.Date(""2022-01-01"")), alpha = 0.5) +
+  geom_vline(colour = ""red"", lty = 2, xintercept = as.numeric(as.Date(""2021-06-01"")), alpha = 0.5) +
+  geom_line(size = 0.7) +
+  scale_x_date(date_breaks = ""1 month"", date_labels = ""%b"") +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~ activity_red, scales = ""free_y"") +
+  theme(legend.position = ""none"",
+        axis.text.x = element_text(size = 5, angle = 60)) + # see if this works when you knit, then do it for the other plots 
+  labs(x = ""Month"", 
+       y = ""Cumulative beneficiaries"", 
+       title = ""Monthly progress by activity, 2021"",
+       subtitle = ""Figures are in cumulative unique beneficiaries reached"") + 
+  theme(plot.title = element_text(size = 12))
+"
+"2","`summarise()` has grouped output by 'date'. You can override using the `.groups` argument.
+"
+"2","`summarise()` has grouped output by 'date'. You can override using the `.groups` argument.
+"

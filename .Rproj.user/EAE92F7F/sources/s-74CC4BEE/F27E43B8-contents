@@ -294,7 +294,7 @@ fsc %>%
            recode(implementing_partner,
                   "AVSI" = "Association of Volunteers in International Service",
                   "Community Empowerment and Resilience Association (CERA)" =
-                    "Community Empowerment and Resilience Association",
+                   "Community Empowerment and Resilience Association",
                   "Health Poverty Action (HPA)" = "Health Poverty Action",
                   "Da-Nu National Affairs organization (DNAO)" = "Da-Nu National Affairs organization",
                   "Helvetas" = "HELVETAS Swiss Intercooperation",
@@ -331,6 +331,81 @@ fsc %>%
 ```
 
 # write_csv 
+
+### this is for the 2021 5Ws
+
+I think you need to make a table and give it to Aung. 
+
+```{r}
+
+read_csv("C:/Users/seany/Downloads/R/fsc_5ws_first_quarter_2022/fsc5w_2021.csv") %>% 
+  mutate(implementing_partners = 
+           recode(implementing_partners,
+                  "AVSI" = "Association of Volunteers in International Service",
+                  "Community Empowerment and Resilience Association (CERA)" =
+                   "Community Empowerment and Resilience Association",
+                  "Health Poverty Action (HPA)" = "Health Poverty Action",
+                  "Da-Nu National Affairs organization (DNAO)" = "Da-Nu National Affairs organization",
+                  "Helvetas" = "HELVETAS Swiss Intercooperation",
+                  "Mangrove Service Network (MSN)" = "Mangrove Service Network",
+                  "MRCS" = "Myanmar Red Cross Society",
+                  "Open Data Myanmar (ODM)" = "Open Data Myanmar", 
+                  "Save the Children" = "Save the Children International",
+                  "Single Touch Point Company Limited (STP)" = "Single Touch Point Company Limited",
+                  "UNDP" = "United Nations Development Programme", 
+                  "Urban Strength (US)" = "Urban Strength",
+                  "WFP" = "World Food Programme",
+                  "World Vision Myanmar" = "World Vision International", 
+                  "Wunpawng Ninghtoi (WPN)" = "Wunpawng Ninghtoi",
+                  "ZigWay" = "Zigway", 
+                  "Center for Social Integrity (CSI)" = "Center for Social Integrity", 
+                  "ACTED" = "Agency for Technical Cooperation and Development", 
+                  "Dai Fin Social Services (Daifin)" = "Dai Fin Social Services", 
+                  "Ethinic Equality Initiative (EEI)" = "Ethinic Equality Initiative",
+                  "Karen Youth Network (KYN)" = "Karen Youth Network",
+                  "KyWO" = "Kayan Women's Organization", 
+                  "People in Need (PIN)" = "People in Need", 
+                  "Première Urgence Internationale (PUI)" = "Premiere Urgence Internationale", 
+                  "Ray of Lights" = "Rays of Light",
+                  "Serve the World" = "Serve The World", 
+                  "Shan State Youth Capacity Building Centre (SSYCBC)" = "Shan State Youth Capacity Building Centre",
+                  "Solidarités International" = "Solidarites International" 
+                  )) %>%
+  left_join(codes %>% select(partner_name, org_code), by = c("implementing_partners" = "partner_name")) %>%
+  mutate(org_code = case_when(implementing_partners == "org_9566" ~ "org_9566", 
+                              implementing_partners == "Best Shelter" ~ "org_8788", 
+                              implementing_partners == "Dai Fin Social Services (Daifin)" ~ "org_6203", 
+                              is.na(org_code) ~ "org_6203",
+                              TRUE ~ org_code)) %>% 
+  mutate(reporting_organization = ifelse(is.na(reporting_organization), implementing_partners, reporting_organization)) %>% 
+  mutate(reporting_organization = 
+           recode(reporting_organization,
+                  "AVSI" = "Association of Volunteers in International Service",
+                  "CARE International" = "Care International", 
+                  "FAO" = "Food and Agriculture Organization", 
+                  "People in Need (PIN)" = "People in Need", 
+                  "UNDP" = "United Nations Development Programme",
+                  "WFP" = "World Food Programme", 
+                  "Solidarités International" = "Solidarites International",
+                  "Première Urgence Internationale (PUI)" = "Premiere Urgence Internationale",
+                  "World Vision Myanmar" = "World Vision International", 
+                  "Save the Children" = "Save the Children International",
+                  "Oxfam" = "OXFAM International", 
+                  "Helvetas" = "HELVETAS Swiss Intercooperation",
+                  "Health Poverty Action (HPA)" = "Health Poverty Action",
+                  "Center for Social Integrity (CSI)" = "Center for Social Integrity", 
+                  "ACTED" = "Agency for Technical Cooperation and Development", 
+                  "Cordaid" = "Catholic Organization for Relief and Development Aid"
+                  )) %>%
+  left_join(codes %>% select(partner_name, report_org_code = org_code), 
+            by = c("reporting_organization" = "partner_name")) %>% 
+  mutate(report_org_code = ifelse(reporting_organization == "org_9566", "org_9566", report_org_code)) %>%
+  select(-reporting_organization, -implementing_partners) %>% 
+  write_csv("C:/Users/seany/Downloads/R/fsc_5ws_first_quarter_2022/fsc5w_2021.csv")
+ # count(report_org_code, reporting_organization)
+  count(implementing_partners, org_code)
+```
+
 
 ```{r}
 read_excel("2022_FSCMYA_5W_template_Q1 2022_IM Combined_draft_27042022_.xlsx", 

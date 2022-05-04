@@ -1,0 +1,13 @@
+"0","fsc %>%  
+  sum_ben2(strat_obj, activity_red) %>% 
+  arrange(desc(beneficiaries)) %>% 
+  pivot_wider(names_from = strat_obj, values_from = beneficiaries, values_fill = 0, names_prefix = ""ben_"") %>% 
+  mutate(Total = ben_so_1 + ben_so_2 + ben_so_3, 
+         `%_ben` = round(Total / sum(Total) * 100, digits = 2)) %>% 
+  relocate(ben_so_1, .after = activity_red) %>% 
+  rename(activity = activity_red) %>% 
+  kable(caption = ""Breakdown of beneficiaries by activity"", format.args = list(big.mark = "","")) %>% 
+  kable_classic_2(""striped"")
+"
+"2","`summarise()` has grouped output by 'strat_obj'. You can override using the `.groups` argument.
+"

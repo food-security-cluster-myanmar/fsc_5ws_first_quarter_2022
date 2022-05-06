@@ -1,0 +1,21 @@
+"0","fsc %>%  
+  filter(!is.na(delivery_modality)) %>%  
+   mutate(delivery_modality = case_when(str_detect(delivery_modality, ""Hybrid"") ~ ""Hybrid"", 
+                                       str_detect(delivery_modality, ""Service"") ~ ""Service delivery"", 
+                                       TRUE ~ delivery_modality)) %>%
+  group_by(state, delivery_modality) %>% 
+  summarise(beneficiaries = sum(beneficiaries)) %>% 
+  group_by(state) %>% 
+  mutate(pc = beneficiaries / sum(beneficiaries),
+         state = fct_reorder(state, beneficiaries)) %>% 
+  ggplot(aes(x = pc, y = fct_rev(state), fill = delivery_modality)) + 
+  geom_col() +
+  scale_x_continuous(labels = percent, breaks = seq(0, 1, by = .2)) + 
+  geom_text(aes(y = state, x = pc + 0.125, label = comma(total, accuracy = 1), fill = NULL), 
+            data = state_totals, hjust = ""inward"", size = 2.5) +
+  labs(x = ""% of total"", y = """", fill = """", 
+       title = ""Percentage of beneficiaries reached by delivery modalities"", 
+       subtitle = ""State beneficiary totals at the end of each bar"")
+"
+"2","`summarise()` has grouped output by 'state'. You can override using the `.groups` argument.
+"

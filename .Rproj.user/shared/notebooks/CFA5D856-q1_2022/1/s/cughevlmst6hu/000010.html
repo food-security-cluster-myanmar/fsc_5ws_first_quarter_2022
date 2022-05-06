@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<style>body{background-color:white;}</style>
+<script src="lib/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="lib/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="lib/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="lib/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="lib/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="lib/kePrint-0.0.1/kePrint.js"></script>
+<link href="lib/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+</head>
+<body>
+<table class=" lightable-classic-2 lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;border-bottom: 0;'>
+<caption>23 townships where the target has already been exceeded</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> state </th>
+   <th style="text-align:left;"> township </th>
+   <th style="text-align:right;"> beneficiaries </th>
+   <th style="text-align:right;"> target </th>
+   <th style="text-align:right;"> gap (desc.) </th>
+   <th style="text-align:right;"> %_reached </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> Hlaingtharya </td>
+   <td style="text-align:right;"> 801,760 </td>
+   <td style="text-align:right;"> 227,976 </td>
+   <td style="text-align:right;"> -573,784 </td>
+   <td style="text-align:right;"> 252.69 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> Shwepyithar </td>
+   <td style="text-align:right;"> 382,031 </td>
+   <td style="text-align:right;"> 111,938 </td>
+   <td style="text-align:right;"> -270,093 </td>
+   <td style="text-align:right;"> 242.29 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> North Okkalapa </td>
+   <td style="text-align:right;"> 269,720 </td>
+   <td style="text-align:right;"> 108,603 </td>
+   <td style="text-align:right;"> -161,117 </td>
+   <td style="text-align:right;"> 149.35 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rakhine </td>
+   <td style="text-align:left;"> Buthidaung </td>
+   <td style="text-align:right;"> 132,642 </td>
+   <td style="text-align:right;"> 25,001 </td>
+   <td style="text-align:right;"> -107,641 </td>
+   <td style="text-align:right;"> 431.55 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> Dala </td>
+   <td style="text-align:right;"> 144,855 </td>
+   <td style="text-align:right;"> 56,325 </td>
+   <td style="text-align:right;"> -88,530 </td>
+   <td style="text-align:right;"> 158.18 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rakhine </td>
+   <td style="text-align:left;"> Sittwe </td>
+   <td style="text-align:right;"> 121,905 </td>
+   <td style="text-align:right;"> 79,999 </td>
+   <td style="text-align:right;"> -41,906 </td>
+   <td style="text-align:right;"> 53.38 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kayah </td>
+   <td style="text-align:left;"> Hpruso </td>
+   <td style="text-align:right;"> 30,215 </td>
+   <td style="text-align:right;"> 4,000 </td>
+   <td style="text-align:right;"> -26,215 </td>
+   <td style="text-align:right;"> 656.38 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kayin </td>
+   <td style="text-align:left;"> Myawaddy </td>
+   <td style="text-align:right;"> 20,843 </td>
+   <td style="text-align:right;"> 5,000 </td>
+   <td style="text-align:right;"> -15,843 </td>
+   <td style="text-align:right;"> 317.86 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kachin </td>
+   <td style="text-align:left;"> Momauk </td>
+   <td style="text-align:right;"> 24,272 </td>
+   <td style="text-align:right;"> 9,311 </td>
+   <td style="text-align:right;"> -14,961 </td>
+   <td style="text-align:right;"> 161.68 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kachin </td>
+   <td style="text-align:left;"> Waingmaw </td>
+   <td style="text-align:right;"> 27,446 </td>
+   <td style="text-align:right;"> 14,284 </td>
+   <td style="text-align:right;"> -13,162 </td>
+   <td style="text-align:right;"> 93.14 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kachin </td>
+   <td style="text-align:left;"> Mansi </td>
+   <td style="text-align:right;"> 17,484 </td>
+   <td style="text-align:right;"> 6,567 </td>
+   <td style="text-align:right;"> -10,917 </td>
+   <td style="text-align:right;"> 167.24 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rakhine </td>
+   <td style="text-align:left;"> Maungdaw </td>
+   <td style="text-align:right;"> 24,983 </td>
+   <td style="text-align:right;"> 16,889 </td>
+   <td style="text-align:right;"> -8,094 </td>
+   <td style="text-align:right;"> 48.92 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kachin </td>
+   <td style="text-align:left;"> Bhamo </td>
+   <td style="text-align:right;"> 19,662 </td>
+   <td style="text-align:right;"> 11,876 </td>
+   <td style="text-align:right;"> -7,786 </td>
+   <td style="text-align:right;"> 66.56 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Shan (South) </td>
+   <td style="text-align:left;"> Pekon </td>
+   <td style="text-align:right;"> 4,710 </td>
+   <td style="text-align:right;"> 150 </td>
+   <td style="text-align:right;"> -4,560 </td>
+   <td style="text-align:right;"> 3,041.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Bago (East) </td>
+   <td style="text-align:left;"> Shwegyin </td>
+   <td style="text-align:right;"> 5,869 </td>
+   <td style="text-align:right;"> 2,561 </td>
+   <td style="text-align:right;"> -3,308 </td>
+   <td style="text-align:right;"> 130.15 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Sagaing </td>
+   <td style="text-align:left;"> Lay Shi </td>
+   <td style="text-align:right;"> 1,525 </td>
+   <td style="text-align:right;"> 168 </td>
+   <td style="text-align:right;"> -1,357 </td>
+   <td style="text-align:right;"> 810.99 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kayah </td>
+   <td style="text-align:left;"> Shadaw </td>
+   <td style="text-align:right;"> 1,606 </td>
+   <td style="text-align:right;"> 500 </td>
+   <td style="text-align:right;"> -1,106 </td>
+   <td style="text-align:right;"> 222.20 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Sagaing </td>
+   <td style="text-align:left;"> Lahe </td>
+   <td style="text-align:right;"> 1,925 </td>
+   <td style="text-align:right;"> 873 </td>
+   <td style="text-align:right;"> -1,052 </td>
+   <td style="text-align:right;"> 121.49 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Mon </td>
+   <td style="text-align:left;"> Bilin </td>
+   <td style="text-align:right;"> 6,031 </td>
+   <td style="text-align:right;"> 5,000 </td>
+   <td style="text-align:right;"> -1,031 </td>
+   <td style="text-align:right;"> 21.62 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rakhine </td>
+   <td style="text-align:left;"> Ann </td>
+   <td style="text-align:right;"> 2,004 </td>
+   <td style="text-align:right;"> 1,000 </td>
+   <td style="text-align:right;"> -1,004 </td>
+   <td style="text-align:right;"> 101.40 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kachin </td>
+   <td style="text-align:left;"> Chipwi </td>
+   <td style="text-align:right;"> 2,708 </td>
+   <td style="text-align:right;"> 1,992 </td>
+   <td style="text-align:right;"> -716 </td>
+   <td style="text-align:right;"> 36.95 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Shan (South) </td>
+   <td style="text-align:left;"> Ywangan </td>
+   <td style="text-align:right;"> 444 </td>
+   <td style="text-align:right;"> 150 </td>
+   <td style="text-align:right;"> -294 </td>
+   <td style="text-align:right;"> 197.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Shan (South) </td>
+   <td style="text-align:left;"> Pindaya </td>
+   <td style="text-align:right;"> 336 </td>
+   <td style="text-align:right;"> 150 </td>
+   <td style="text-align:right;"> -186 </td>
+   <td style="text-align:right;"> 125.00 </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<sup></sup> Only townships which have targets have been included; there are 12 townships without targets but with beneficiaries</td></tr></tfoot>
+</table> <script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [["$","$"]]}})</script><script async src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>

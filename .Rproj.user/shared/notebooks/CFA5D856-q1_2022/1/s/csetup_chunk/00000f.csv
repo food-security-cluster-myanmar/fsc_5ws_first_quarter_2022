@@ -1,21 +1,130 @@
 "0","knitr::opts_chunk$set(echo = FALSE, fig.width=9, message = FALSE, warning=FALSE)"
 "0","library(tidyverse)"
+"2","Registered S3 methods overwritten by 'dbplyr':
+  method         from
+  print.tbl_lazy     
+  print.tbl_sql      
+"
+"2","[30m-- [1mAttaching packages[22m ------------------------------------------------------------------------------------------------------- tidyverse 1.3.1 --[39m
+"
+"2","[30m[32mâˆš[30m [34mggplot2[30m 3.3.5     [32mâˆš[30m [34mpurrr  [30m 0.3.4
+[32mâˆš[30m [34mtibble [30m 3.1.6     [32mâˆš[30m [34mdplyr  [30m 1.0.7
+[32mâˆš[30m [34mtidyr  [30m 1.1.4     [32mâˆš[30m [34mstringr[30m 1.4.0
+[32mâˆš[30m [34mreadr  [30m 2.1.1     [32mâˆš[30m [34mforcats[30m 0.5.1[39m
+"
+"2","[30m-- [1mConflicts[22m ---------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
+[31mx[30m [34mdplyr[30m::[32mfilter()[30m masks [34mstats[30m::filter()
+[31mx[30m [34mdplyr[30m::[32mlag()[30m    masks [34mstats[30m::lag()[39m
+"
 "0","library(readxl)"
 "0","library(lubridate)"
+"2","
+Attaching package: ‘lubridate’
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    date, intersect, setdiff, union
+
+"
 "0","library(stringi)"
 "0","library(pander)"
 "0","library(janitor)"
+"2","
+Attaching package: ‘janitor’
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    chisq.test, fisher.test
+
+"
 "0","library(fuzzyjoin)"
 "0","library(scales)"
+"2","
+Attaching package: ‘scales’
+
+"
+"2","The following object is masked from ‘package:purrr’:
+
+    discard
+
+"
+"2","The following object is masked from ‘package:readr’:
+
+    col_factor
+
+"
 "0","library(magrittr)"
+"2","Warning: package ‘magrittr’ was built under R version 4.1.3"
+"2","
+Attaching package: ‘magrittr’
+
+"
+"2","The following object is masked from ‘package:purrr’:
+
+    set_names
+
+"
+"2","The following object is masked from ‘package:tidyr’:
+
+    extract
+
+"
 "0","library(sf)"
+"2","Linking to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1; sf_use_s2() is TRUE
+"
 "0","library(kableExtra)"
+"2","
+Attaching package: ‘kableExtra’
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    group_rows
+
+"
 "0","library(viridis)"
+"2","Loading required package: viridisLite
+"
+"2","
+Attaching package: ‘viridis’
+
+"
+"2","The following object is masked from ‘package:scales’:
+
+    viridis_pal
+
+"
 "0","library(skimr)"
+"2","Warning: package ‘skimr’ was built under R version 4.1.3"
 "0","library(plotly)"
+"2","Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"2","
+Attaching package: ‘plotly’
+
+"
+"2","The following object is masked from ‘package:ggplot2’:
+
+    last_plot
+
+"
+"2","The following object is masked from ‘package:stats’:
+
+    filter
+
+"
+"2","The following object is masked from ‘package:graphics’:
+
+    layout
+
+"
 "0","library(patchwork)"
 "0","library(broom)"
-"0","library(RcppRoll)"
+"0","library(DT)"
 "0",""
 "0",""
 "0","theme_set(theme_light())"
@@ -30,7 +139,7 @@
 "0","panderOptions(""big.mark"", "","")"
 "0",""
 "0","# replace "
-"0","options(knitr.kable.NA = """")"
+"0","opts <- options(knitr.kable.NA = """")"
 "0",""
 "0","`%out%` <- Negate(`%in%`)"
 "0",""
@@ -89,6 +198,14 @@
 "0","         admin3_pcode = admin3pcode_12, "
 "0","         vt_town = vt_and_town_13, "
 "0","         admin4_pcode = vt_and_town_pcode_14)"
+"2","New names:
+* State -> State...1
+* Admin1PCODE -> Admin1PCODE...2
+* `` -> ...3
+* Admin1PCODE -> Admin1PCODE...4
+* State -> State...5
+* ...
+"
 "0"," "
 "0","villages <- read_excel(""2022_FSCMYA_5W_template.xlsx"", "
 "0","           sheet = ""GEOADMINS"") %>% "
@@ -100,17 +217,38 @@
 "0","         admin3_pcode = admin3pcode_20, "
 "0","         vt_town = vt_and_town_21, "
 "0","         admin4_pcode = vt_and_town_pcode_22)"
-"0",""
+"2","New names:
+* State -> State...1
+* Admin1PCODE -> Admin1PCODE...2
+* `` -> ...3
+* Admin1PCODE -> Admin1PCODE...4
+* State -> State...5
+* ...
+"
 "0","camps <- read_excel(""2022_FSCMYA_5W_template.xlsx"", "
 "0","           sheet = ""GEOADMINS"") %>% "
 "0","  clean_names() %>%"
 "0","  select(township = township_29, camp_name, pcode_camp = p_code_camp)"
-"0",""
+"2","New names:
+* State -> State...1
+* Admin1PCODE -> Admin1PCODE...2
+* `` -> ...3
+* Admin1PCODE -> Admin1PCODE...4
+* State -> State...5
+* ...
+"
 "0","industrial_zones <- read_excel(""2022_FSCMYA_5W_template.xlsx"", "
 "0","           sheet = ""GEOADMINS"") %>% "
 "0","  clean_names() %>% "
 "0","  select(state = state_36, admin1_pcode = admin1pcode_37, industrial_zone = industrial_zones)"
-"0",""
+"2","New names:
+* State -> State...1
+* Admin1PCODE -> Admin1PCODE...2
+* `` -> ...3
+* Admin1PCODE -> Admin1PCODE...4
+* State -> State...5
+* ...
+"
 "0","fsc <- read_csv(""fsc_codes.csv"") %>% "
 "0","  rename_all(~str_replace_all(., ""^number_of_"", """")) %>%"
 "0","  rename_all(~str_replace_all(., ""^number_"", """")) %>%"
@@ -138,11 +276,11 @@
 "0","                                  admin3_pcode == ""MMR016321"" ~ ""MMR016003"", "
 "0","                                  TRUE ~ admin3_pcode)) %>% "
 "0","  # removing a duplicate entry from the left join "
-"0","  mutate(drop = case_when(admin4_pcode == ""MMR007008058"" ~ 1, TRUE ~ 0)) %>% "
+"0","  mutate(drop = case_when(admin4_pcode == ""MMR007008058"" ~ 1, TRUE ~ 0)) %>%"
+"0","  filter(drop != 1) %>% select(-drop) %>%"
 "0","  rename(response_plan = response_plan_if_project_under_fts, "
 "0","         beneficiaries = reached_beneficiaries, "
 "0","         households = reached_households) %>% "
-"0","  filter(drop != 1) %>% select(-drop) %>% "
 "0","  replace_na(list(new_beneficiaries = 0)) %>% "
 "0","  mutate(activity_red = case_when(activity %in% c(""food distributions (in kind/voucher/cash), moderate"", "
 "0","                                                  ""food distributions (in kind/voucher/cash), severe"") ~ "
@@ -195,13 +333,35 @@
 "0","         usd_person_bin = fct_relevel(usd_person_bin, c(""<$2"", "">=$2_<$4"", "">=$4_<$6"", "">=$6_<$8"", "">=$8_<$10"","">=$10_<$12"", "
 "0","                                                  "">=$12_<$14"", "">=$14_<$16"", "">=$16_<$18"", "">=$18_<$20"","">=20""))) %>% "
 "0","  mutate(location_type = recode(location_type, ""village"" = ""Village""))"
+"2","[1mRows: [22m[34m2116[39m [1mColumns: [22m[34m60[39m
+"
+"2","[36m--[39m [1mColumn specification[22m [36m------------------------------------------------------------------------------------------------------------------------[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m (42): month_of_implementation, donor, reporting_organization_type, implementing_partner_type, state_region, township, village_tract_town...
+[32mdbl[39m (17): quantity, total_value, value_per_household, value_per_individual, value_per_household_usd, number_child_male, number_child_female,...
+[33mlgl[39m  (1): admin2_pcode
+"
+"2","
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m to retrieve the full column specification for this data.
+[36mi[39m Specify the column types or set [38;5;235m[48;5;253m[38;5;235m[48;5;253m`show_col_types = FALSE`[48;5;253m[38;5;235m[49m[39m to quiet this message.
+"
+"2","Warning: Unknown levels in `f`: >=20"
 "0"," "
 "0","  "
 "0","pin <- read_csv(""fs_pin.csv"") %>% "
 "0","  select(-admin1_pcode) %>% "
 "0","  left_join(pcode4 %>% distinct(admin1_pcode, state), by = ""state"")"
-"0",""
-"0",""
+"2","[1mRows: [22m[34m330[39m [1mColumns: [22m[34m30[39m
+"
+"2","[36m--[39m [1mColumn specification[22m [36m------------------------------------------------------------------------------------------------------------------------[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m  (6): state, admin1_pcode, district, township, admin3_pcode, group
+[32mdbl[39m (24): population_2021_proj, fs_pin, fs_targeted, battles, explosions_remote_violence, protests_and_riots, strategic_developments, violen...
+"
+"2","
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m to retrieve the full column specification for this data.
+[36mi[39m Specify the column types or set [38;5;235m[48;5;253m[38;5;235m[48;5;253m`show_col_types = FALSE`[48;5;253m[38;5;235m[49m[39m to quiet this message.
+"
 "0","fsc_2021 <- read_csv(""fsc5w_2021.csv"") %>%"
 "0","  mutate(activity_new = "
 "0","           case_when(str_detect(activity_description, ""Local Chicken support"") ~"
@@ -262,7 +422,18 @@
 "0","                                       ""provision of livestock kits"" = ""livestock kits"","
 "0","                                       ""income-generating activities and small grants"" = ""IGA and small grants""), "
 "0","         activity_red = str_remove_all(activity_red, ""provision of ""))"
-"0",""
+"2","[1mRows: [22m[34m16041[39m [1mColumns: [22m[34m72[39m
+"
+"2","[36m--[39m [1mColumn specification[22m [36m------------------------------------------------------------------------------------------------------------------------[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m  (46): month_of_implementation, donor, reporting_organization_type, implementing_partner_type, state, township, village_ward_town, camp,...
+[32mdbl[39m  (25): quantity_for_in_kind_assistance, value_per_household, value_per_household_usd, total_value_usd, total_value_mmk, child_male, chil...
+[34mdate[39m  (1): date
+"
+"2","
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m to retrieve the full column specification for this data.
+[36mi[39m Specify the column types or set [38;5;235m[48;5;253m[38;5;235m[48;5;253m`show_col_types = FALSE`[48;5;253m[38;5;235m[49m[39m to quiet this message.
+"
 "0","# shapefiles"
 "0","pcode3_shape <- st_read(""./mmr_polbnda_adm3_mimu_250k/mmr_polbnda_adm3_mimu_250k.shp"", quiet = TRUE) %>%"
 "0","  rename(state = ST, "

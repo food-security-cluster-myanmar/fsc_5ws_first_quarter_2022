@@ -1,6 +1,0 @@
-"0","round(filter(fsc, humanitarian_or_development == ""Humanitarian"") %>% {sum(.$new_beneficiaries, na.rm = TRUE)} / sum(fsc$new_beneficiaries, na.rm = TRUE) * 100, digits = 2)
-"
-"1","[1]"
-"1"," 98.78"
-"1","
-"

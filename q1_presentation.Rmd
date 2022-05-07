@@ -5,6 +5,7 @@ author: "Myanmar Food Security Cluster"
 date: "2022/05/06 (updated: `r Sys.Date()`)"
 output:
   xaringan::moon_reader:
+    self_contained: true
     lib_dir: libs
     nature:
       highlightStyle: github
@@ -16,7 +17,7 @@ class: center, middle
 ![](Myanmar_cluster_blue.png)
 
 ```{r setup, include=FALSE}
-options(htmltools.dir.version = FALSE, htmltools.preserve.raw = FALSE)
+options(htmltools.dir.version = FALSE)
 
 knitr::opts_chunk$set(echo = FALSE, fig.width=12, message = FALSE, warning=FALSE, 
                       fig.asp = 9/16, fig.align = 'center', out.width = "95%", dpi= 300)

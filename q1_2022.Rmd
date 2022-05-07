@@ -56,6 +56,7 @@ library(skimr)
 library(plotly)
 library(patchwork)
 library(broom)
+library(DT)
 
 
 theme_set(theme_light())
@@ -70,7 +71,7 @@ panderOptions('table.split.table', Inf)
 panderOptions("big.mark", ",")
 
 # replace 
-options(knitr.kable.NA = "")
+opts <- options(knitr.kable.NA = "")
 
 `%out%` <- Negate(`%in%`)
 
@@ -328,13 +329,14 @@ To recall, the Food Security Cluster's strategic objectives for 2022 are:
 * SO2: Vulnerable persons (excl. IDPs) have equitable access to sufficient, safe and nutritious food (either in-kind or through food assistance)
 * SO3: Restore, protect and improve livelihoods and resilience 
 
-```{r}
+```{r beneficiaries-by-so}
 fsc %>% 
   sum_ben2(strat_obj, humanitarian_or_development) %>% 
   ungroup() %>%
   pivot_wider(names_from = humanitarian_or_development, values_from = beneficiaries, values_fill = 0) %>% 
   mutate(strat_obj = fct_relevel(strat_obj, levels = c("so_1", "so_2", "so_3")), 
-         Total = Development + Humanitarian) %>% 
+         Total = Development + Humanitarian, 
+         strat_obj = str_to_upper(strat_obj)) %>%
   adorn_totals("row") %>% 
   kable(caption = "2022 beneficiaries by strategic objective", format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped", full_width = FALSE)
@@ -363,7 +365,7 @@ fsc %>%
 
 57% of beneficiaries were reached by activities where nutrition was mainstreamed. This is highly encouraging. As the year progresses, it will be important to collect more details about how exactly nutrition has been mainstreamed so that coordination with the Nutrition Cluster may be improved. 
 
-```{r}
+```{r table-nutrition-mainstreaming}
 fsc %>% 
   mutate(was_nutrition_mainstreamed_in_activity = ifelse(is.na(was_nutrition_mainstreamed_in_activity), 
                                                          "No", was_nutrition_mainstreamed_in_activity), 
@@ -525,7 +527,7 @@ This first plot below is a histogram of location, by number of beneficiaries. Th
 
 <br> 
 
-```{r}
+```{r facet-locations-activities}
 fsc %>% 
   filter(!is.na(location)) %>% 
   group_by(location, township) %>%  
@@ -639,7 +641,7 @@ Food distributions (in-kind and CBT/CVA) continued to be the largest activity fr
 
 The plots below, faceted by delivery modality, show the breakdown of activities by delivery modality. All activities besides food distribution correpsonded to only one type of delivery modality.  
 
-```{r facet-delivery-modalities options(knitr.kable.NA = "NA")}
+```{r facet-delivery-modalities}
 fsc %>% 
   filter(!is.na(delivery_modality)) %>% 
   mutate(delivery_modality = case_when(str_detect(delivery_modality, "Hybrid") ~ "Hybrid", 
@@ -671,7 +673,8 @@ fsc %>%
 
 There are also clear differences between the different location types and the delivery modalities employed with them. Rural vilalges were predominated by in-kind distributions whilst camps and IDP sites were mostly targeted with cash-based interventions. 
 
-```{r facet-location-delivery-modality}
+```{r facet-location}
+
 fsc %>%  
    mutate(delivery_modality = case_when(str_detect(delivery_modality, "Hybrid") ~ "Hybrid", 
                                        str_detect(delivery_modality, "Service") ~ "Service delivery", 
@@ -696,7 +699,7 @@ Below is a breakdown of percentage of beneficiaries reached by the different del
 <br>
 
 
-```{r}
+```{r delivery-modalities-stacked-bar}
 state_totals <- fsc %>% 
   filter(!is.na(delivery_modality)) %>% 
   group_by(state) %>% 
@@ -732,7 +735,7 @@ fsc %>%
 
 ### 3.1 Cash transfer values per household
 
-```{r}
+```{r usd-hhd-bin-barplot}
 
 fsc %>%
   filter(!is.na(usd_per_hhd) & !is.na(new_beneficiaries)) %>% 
@@ -793,7 +796,7 @@ The x-axis shows the average value per person or per household, depending on the
 
 <br>
 
-```{r}
+```{r partner-cash-values, fig.height=6}
 partner_mean_usd <- function(tbl, name){
 
   tbl %>% 
@@ -903,7 +906,7 @@ money_scatter <- fsc %>%
   theme(legend.text = element_text(size = 5)) + 
   guides(colour = guide_legend(override.aes = list(size = 1, alpha = 1)))
 
-ggplotly(money_scatter, tooltip = c("text")) %>% 
+ggplotly(money_scatter, tooltip = c("text"), width = 820) %>% 
   layout(title = list(text = paste0("Average USD transfer value per person",
                                     "<br>",
                                     "<sup>",
@@ -950,11 +953,12 @@ food_dist_range <- fsc %>%
        title = "Food distribution: range of USD values per person by state",
        size = "", colour = "") 
 
-ggplotly(food_dist_range, tooltip = c("text")) %>% 
+ggplotly(food_dist_range, tooltip = c("text"), width = 820, height =  600) %>% 
   layout(title = list(text = paste0("Food distribution: range of USD values per person by state",
                                     "<br>",
                                     "<sup>",
-                                    "The red line is 50% of food MEB; double-click on legend to select","</sup>"))) 
+                                    "The red line is 50% of food MEB; double-click on legend to select","</sup>")), 
+         legend = list(font = list(size = 7))) 
 ```
 
 <br>
@@ -1070,6 +1074,123 @@ The general lack of evidence of evidence of beneficiaries' food insecurity statu
 
 <br><br><br>
 
+### 4.3 Beneficiary disaggregation 
+
+```{r}
+fsc_disagg <- fsc %>% 
+  pivot_longer(cols = c(child_male:elderly_female), names_to = "disagg", values_to = "ben_sub") %>% 
+  left_join(tribble(
+    ~age, ~sex, ~disagg, ~value, 
+    "child", "male", "child_male", 0.162989989,
+    "child", "female", "child_female", 0.158900883,
+    "adult", "male", "adult_male", 0.271450831,
+    "adult", "female", "adult_female", 0.300444585,
+    "elderly", "male", "elderly_male", 0.044029423,
+    "elderly", "female", "elderly_female", 0.06218429
+    ) %>% 
+              select(disagg, census_prop = value), by = "disagg") %>%
+  filter(ben_sub != 0) %>% 
+  mutate(ben_prop = ben_sub / beneficiaries, 
+         ben_prop_compare = abs(census_prop - ben_prop),
+         same_as_census = ifelse(ben_prop_compare < 0.05, "backfilled", "real"))
+
+fsc_disagg_values <- fsc_disagg %>% 
+  filter(new_beneficiaries > 0) %>% 
+  group_by(same_as_census) %>% 
+  summarise(ben_sub = sum(ben_sub)) %>% 
+  adorn_percentages("col") %>%  
+  mutate(ben_sub = round(ben_sub * 100, digits = 2))
+```
+
+Due to the problems in reporting disaggregated beneficiary data, two tests have been applied to the submitted 5W data. The first involves a comparison to the proportions of disaggregation groups in the census to determine if values have been backfilled from the census.  
+
+The plots below show the breakdowns between the "real" values and those that have been backfilled from the census. Approximately 59% of beneficiaries reported had "real" disaggregations; this is an improvement from 2021, where only 44% of beneficiaries had "real" disaggregations. 
+
+In the "real" values, it can be seen that the proportion of adult females reached is much higher than adult males -- this is in line with the CLuster's udnerstanding of several activities that specifically target women. The percentages of elderly persons actually reached is also much lower than what has been reported. 
+
+<br>
+
+```{r}
+fsc_disagg %>%
+  filter(new_beneficiaries > 0) %>% 
+  filter(same_as_census == "real") %>% 
+  group_by(disagg) %>% 
+  summarise(ben_freq = sum(ben_sub)) %>% 
+  mutate(disagg = fct_relevel(disagg, 
+                              c("child_male", "child_female", "adult_male", "adult_female", "elderly_male", "elderly_female")
+                              # c("elderly_female", "elderly_male", "adult_female", "adult_male", "child_female", "child_male")
+                              )) %>% 
+  adorn_percentages("col") %>% 
+  ggplot(aes(x = disagg, y = ben_freq, fill = disagg)) + 
+  geom_col() + 
+  geom_text(aes(label = round(ben_freq * 100, digits = 1)), size = 3, vjust = -0.3) +
+  scale_y_continuous(labels = percent, breaks = seq(0, 0.4, by = 0.1)) +
+  labs(x = "Disaggregation group", 
+       y = "Percentage of beneficiaries",
+       title = "% of beneficiaries by disaggregation group", 
+       subtitle = "Only contains real* values; 59% of beneficiaries") +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  
+fsc_disagg %>% 
+  filter(new_beneficiaries > 0) %>% 
+  # filter(same_as_census == "backfilled") %>% 
+  group_by(disagg) %>% 
+  summarise(ben_freq = sum(ben_sub)) %>% 
+  mutate(disagg = fct_relevel(disagg, 
+                              c("child_male", "child_female", "adult_male", "adult_female", "elderly_male", "elderly_female")
+                              # c("elderly_female", "elderly_male", "adult_female", "adult_male", "child_female", "child_male")
+                              )) %>% 
+  adorn_percentages("col") %>% 
+  ggplot(aes(x = disagg, y = ben_freq, fill = disagg)) + 
+  geom_col() + 
+  geom_text(aes(label = round(ben_freq * 100, digits = 1)), size = 3, vjust = -0.3) +
+  scale_y_continuous(labels = percent, breaks = seq(0, 0.4, by = 0.1)) +
+  labs(x = "Disaggregation group", 
+       y = "Percentage of beneficiaries",
+       title = "% of beneficiaries by disaggregation group", 
+       subtitle = "Contains all values, including backfilled values") +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+<br>
+
+The second test applied is if the disaggregated numbers of beneficiaries reached have been copied and pasted. To do this, the proportions of each disaggregation group by partner have been compared to how close they were to the mean for the entire group. To explain: if partner A reported that 40% of beneficiaries in an activity were adult females, this percentage was then compared to the average percentage of adult females for all other activities reported by that partner. This measure whether or not the same proportions were copied and pasted throughout the 5W form. 
+
+It is extremely unlikely that these percentages would be similar across activities as implementing partners worked in an average of `r round(fsc %>% group_by(org_code) %>% summarise(locations = n_distinct(location)) %>% {mean(.$locations)}, digits = 2)` locations. 
+
+In the plot below, the closer a value is to 0% on the x-axis, the more likely it is that it was copied and pasted. It is estimated that 89% of beneficiary disaggregation values were copied and pasted. 
+
+<br>
+
+```{r}
+
+fsc_disagg %>% 
+  filter(new_beneficiaries > 0) %>% 
+  mutate(pc_disagg = ben_sub / beneficiaries) %>% 
+  group_by(org_code, disagg) %>% 
+  summarise(mean = mean(pc_disagg), 
+            sd = sd(pc_disagg, na.rm = TRUE),
+            ben_sub = sum(ben_sub, na.rm = TRUE)) %>% 
+  mutate(cat = ifelse(sd >= .05, "real", "fake")) %>% 
+  filter(!is.na(cat)) %>% 
+  # group_by(cat) %>% 
+  # summarise(ben = sum(ben_sub)) %>%
+  # mutate(pc = ben / sum(ben))
+  ggplot(aes(x = sd)) +
+  geom_histogram() + 
+  scale_x_continuous(labels = percent_format(accuracy = 1)) + 
+  labs(x = "Percentage difference from group mean", 
+       title = "Histogram of standard deviations across beneficiary disaggregations", 
+       subtitle = "The lower the standard deviation, the more likely to be copy/pasted")
+ 
+```
+
+
+
+<br><br><br>
+
 ## 5. Partners
 
 There are `r fsc %>% distinct(org_code) %>% nrow()` partners that were involved in direct implementation that have reported achievements in first quarter of 2022. These implementing partners corresponded to a total of `r fsc %>%  distinct(report_org_code) %>% nrow()` reporting organisations. The largest reporting organisation, org_2690, had 21 implementing partners. All other reporting organisations had 1 or 2 implementing partners.   
@@ -1085,7 +1206,11 @@ partner_scatter <- fsc %>%
   summarise(states = n_distinct(state), 
             townships = n_distinct(admin3_pcode), 
             beneficiaries = sum(new_beneficiaries)) %>% 
-  ggplot(aes(x = beneficiaries, y = townships, text = org_code)) + 
+  ggplot(aes(x = beneficiaries, y = townships, 
+             text = paste0(org_code, "\n", 
+                           "states: ", states, "\n", 
+                           "townships: ", townships, "\n", 
+                           "beneficiaries: ", comma(beneficiaries, accuracy = 1)))) + 
   geom_point(aes(size = beneficiaries), alpha = .7) + 
   scale_x_continuous(trans = "log", labels = comma, breaks = c(0, 100, 300, 1000, 3000, 10000, 100000, 300000)) +
   scale_y_continuous(breaks = seq(0, 25, 5)) +
@@ -1094,7 +1219,7 @@ partner_scatter <- fsc %>%
        title = "Plot of beneficiaries and townships reached, by implementing partner") +
   theme(legend.position = "none")
 
-ggplotly(partner_scatter) %>%
+ggplotly(partner_scatter, tooltip = c("text"), width = 820) %>%
   config(displayModeBar = FALSE) %>% 
   layout(title = list(text = paste0("Plot of beneficiaries and townships reached, by implementing partner",
                                     "<br>", 
@@ -1248,13 +1373,16 @@ ben_target <- fsc %>%
   scale_colour_viridis(direction = -1) +
   labs(x = "Targeted population", y = "Beneficiaries", 
        title = "Beneficiaries reached vs targeted population by township, Q1 2022",
-       subtitle = "The red line is 100% of target")
+       subtitle = "The red line is 100% of target") + 
+  theme(legend.title = element_text(size = 7))
 
-ggplotly(ben_target, tooltip = c("text")) %>% 
+ggplotly(ben_target, tooltip = c("text"), width = 820, height = 500) %>% 
+  config(displayModeBar = FALSE) %>% 
   layout(title = list(text = paste0("Beneficiaries reached vs targeted population by township, Q1 2022",
                                     "<br>",
                                     "<sup>",
-                                    "The red line is 100% of target; size indicates number of beneficiaries","</sup>")))
+                                    "The red line is 100% of target; size indicates number of beneficiaries","</sup>")), 
+         legend = list(font = list(size = 7)))
 
 ```
 
@@ -1262,7 +1390,7 @@ ggplotly(ben_target, tooltip = c("text")) %>%
 
 ### 6.2 Map of beneficiaries reached vs 2022 target
 
-```{r fig.height=10}
+```{r maps-ben-target, fig.height=9}
 fsc %>% 
   group_by(admin3_pcode = admin3_pcode_old) %>% 
   summarise(beneficiaries = sum(beneficiaries)) %>% 
@@ -1304,7 +1432,13 @@ pin %>%
 
 With the important exceptions of Yangon and the Southeast, beneficiaries are concentrated in the peripheral and border regions of the union, where humanitarian actors have traditionally been present. As mentioned in previous reports, this is not consistent with the current patterns of needs and vulnerability.
 
-There was an overallocation of resources in these relatively few areas in 2021 and this has continued in 2022. Below is a list of townships that have already exceeded their targets, though it should be mentioned that some of the townships with very small targets should be re-examined. 
+<br><br><br>
+
+### 6.3 Interactive reference table
+
+There was an overallocation of resources in these relatively few areas in 2021 and this has continued in 2022. In the interactive table below, is a list of townships sorted by the gap between the targeted population and beneficiaries reached in 2022. Any of the columns can be sort; the search bars above each column can also assist in filtering. 
+
+<br>
 
 ```{r}
 fsc %>% 
@@ -1318,14 +1452,17 @@ fsc %>%
          has_beneficiaries = ifelse(beneficiaries > 0, 1, 0)) %>% 
   mutate(reached_pc = ifelse(is.infinite(reached_pc), 100, reached_pc), 
          fs_targeted = round(fs_targeted)) %>% 
-  filter(reached_pc >= 1 & fs_targeted > 0) %>% 
-  arrange((gap)) %>% 
+  arrange(gap) %>% 
   select(state, township, beneficiaries, target = fs_targeted, `gap (desc.)` = gap, `%_reached` = reached_pc) %>%  
-  kable(caption = "23 townships where the target has already been exceeded", 
-        format.args = list(big.mark = ",")) %>% 
-  kable_classic_2("striped") %>% 
-  footnote("Only townships which have targets have been included; there are 12 townships without targets but with beneficiaries", 
-           general_title = "")
+  datatable(options = list(pageLength = 15, scrollX = TRUE), 
+            filter = list(position = "top", clear = FALSE),
+            caption = htmltools::tags$caption(style = 'caption-side: top; 
+                                    text-align: center; 
+                                    color:black; font-size:120% ;',
+                                    "Reference table -- townships")) %>% 
+  formatRound(c("target", "beneficiaries", "gap (desc.)"), digits = 0) %>% 
+  formatStyle(0, target = "row", lineHeight = "80%", fontSize = "80%")
+
 
 
 ```

@@ -256,3 +256,46 @@ fsc %>%
   summarise(beneficiaries = sum(beneficiaries), 
             total_value_usd = sum(total_value_usd), 
             rounds = round(mean(rounds), digits = 2))
+
+# Agriculture stuff
+
+fsc %>%  count(activity_red)
+
+fsc %>% filter(activity_red %in% c("crop, vegetable and seed kits", "FFS and farmer training", 
+                                   "IGA and small grants", "livestock kits")) %>%  
+  group_by(state, township, activity_red) %>%  
+  summarise(beneficiaries = sum(new_beneficiaries), .groups = "drop") %>% 
+  filter(beneficiaries != 0) %>%  
+  arrange(desc(beneficiaries)) %>%  
+  mutate(full_name = str_wrap(paste0(township, ", ", state))) %>% 
+  ggplot(aes(x = reorder(str_wrap(full_name, 12), -beneficiaries), y = beneficiaries)) + 
+  geom_col(aes(fill = activity_red)) + 
+  theme(axis.text.x = element_text(angle = 45, vjust = .9, hjust = .9)) + 
+  labs(x = "Township", y = "Beneficiaries", fill = "Acitvity", 
+       title = "Beneficiaries reached by agicultural and livestock activities")
+
+fsc %>% filter(activity_red %in% c("crop, vegetable and seed kits", "FFS and farmer training", 
+                                   "IGA and small grants", "livestock kits")) %>%  
+  group_by(activity_red) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries)) %>% 
+  ggplot(aes(x = fct_reorder(activity_red, -beneficiaries), y = beneficiaries)) + 
+  geom_col(aes(fill = activity_red)) + 
+  geom_text(aes(label = comma(beneficiaries)), size = 3, vjust = -.5) + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = comma) + 
+  labs(x = "", y = "Beneficiaries reached", 
+       title = "Number of beneficiaries reached by agricultural activity")
+
+fsc %>%  
+  mutate(agricultural_activity = if_else(activity_red %in% c("crop, vegetable and seed kits", "FFS and farmer training", 
+                                                             "IGA and small grants", "livestock kits"), "yes", "no"), 
+         agricultural_activity = fct_rev(agricultural_activity)) %>% 
+  group_by(agricultural_activity) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries), 
+            states = n_distinct(admin1_pcode), 
+            townships = n_distinct(admin3_pcode), 
+            partners = n_distinct(org_code)) %>%
+  mutate(`%_beneficiaries` = round(beneficiaries / sum(beneficiaries) * 100, digits = 2)) %>% 
+  relocate(`%_beneficiaries`, .after = beneficiaries) %>% 
+  kable(caption = "Breakdown of agricultural and non-agricultural activities", format.args = list(big.mark = ",")) %>% 
+  kable_classic_2("striped")

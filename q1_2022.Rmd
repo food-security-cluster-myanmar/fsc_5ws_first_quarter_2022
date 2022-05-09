@@ -129,7 +129,8 @@ pcode4 <- read_excel("2022_FSCMYA_5W_template.xlsx",
          township = township_11,
          admin3_pcode = admin3pcode_12, 
          vt_town = vt_and_town_13, 
-         admin4_pcode = vt_and_town_pcode_14)
+         admin4_pcode = vt_and_town_pcode_14) %>% 
+  filter(!is.na(admin4_pcode))
  
 villages <- read_excel("2022_FSCMYA_5W_template.xlsx", 
            sheet = "GEOADMINS") %>% 
@@ -140,17 +141,20 @@ villages <- read_excel("2022_FSCMYA_5W_template.xlsx",
          township = township_19,
          admin3_pcode = admin3pcode_20, 
          vt_town = vt_and_town_21, 
-         admin4_pcode = vt_and_town_pcode_22)
+         admin4_pcode = vt_and_town_pcode_22) %>% 
+  filter(!is.na(location))
 
 camps <- read_excel("2022_FSCMYA_5W_template.xlsx", 
            sheet = "GEOADMINS") %>% 
   clean_names() %>%
-  select(township = township_29, camp_name, pcode_camp = p_code_camp)
+  select(township = township_29, camp_name, pcode_camp = p_code_camp) %>% 
+  filter(!is.na(camp_name))
 
 industrial_zones <- read_excel("2022_FSCMYA_5W_template.xlsx", 
            sheet = "GEOADMINS") %>% 
   clean_names() %>% 
-  select(state = state_36, admin1_pcode = admin1pcode_37, industrial_zone = industrial_zones)
+  select(state = state_36, admin1_pcode = admin1pcode_37, industrial_zone = industrial_zones) %>%  
+  filter(!is.na(industrial_zone))
 
 fsc <- read_csv("fsc_codes.csv") %>% 
   rename_all(~str_replace_all(., "^number_of_", "")) %>%
@@ -389,7 +393,9 @@ As in 2021, the number of beneficiaries reached has been heavily biased towards 
 
 <br> 
 
+
 ```{r barplot-state-region}
+
 fsc %>% 
   group_by(state, admin1_pcode) %>% 
   summarise(beneficiaries = sum(new_beneficiaries), .groups = "drop") %>% 
@@ -409,8 +415,9 @@ fsc %>%
        title = "Number of beneficiaries reached by state, Food Security Cluster",
        subtitle = "and percentage of target reached") 
 
-# ggsave("by_state_q1_2022.png", dpi = 300, height = 5, width = 8, units = "in")
+# ggsave("by_state_q1_2022.png", dpi = 300, height = 5, width = 8, units = "in")  
 ```
+
 
 <br>
 
@@ -423,7 +430,11 @@ The table below outlines the number of beneficiaries reached by state/region in 
 ```{r table-statewise-comparison-21-22}
 state_ord <- fsc %>% 
   group_by(state, admin1_pcode) %>% 
-  summarise(beneficiaries = sum(new_beneficiaries, na.rm = TRUE)) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries, na.rm = TRUE)) %>%
+  left_join(pin %>% 
+              group_by(admin1_pcode) %>% 
+              summarise(target = sum(fs_targeted, na.rm = TRUE))) %>% 
+  mutate(pc_reached = round(beneficiaries / target * 100, digits = 2)) %>% 
   arrange(desc(beneficiaries)) %>% 
   rbind(tribble(~state, ~admin1_pcode, ~beneficiaries,
                 "Ayeyarwady", NA_character_, NA_real_,
@@ -439,33 +450,35 @@ state_ord_2021 <- fsc_2021 %>%
               group_by(admin1_pcode) %>%
               summarise(beneficiaries_2022 = sum(new_beneficiaries, na.rm = TRUE)),
             by = "admin1_pcode") %>% 
-  arrange(desc(beneficiaries_2022))
+  arrange(desc(beneficiaries_2022)) %>% 
+  filter(state %out% c("Bago (West)", "Nay Pyi Taw"))
 
 fsc %>% 
-  group_by(state, humanitarian_or_development) %>% 
-  summarise(beneficiaries = sum(new_beneficiaries, na.rm = TRUE), .groups = "drop") %>% 
-  pivot_wider(names_from = humanitarian_or_development, values_from = beneficiaries) %>%
-  rowwise() %>% 
-  mutate(beneficiaries = sum(Humanitarian, Development, na.rm = TRUE)) %>% 
+  group_by(state, admin1_pcode) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries), .groups = "drop") %>% 
   ungroup() %>% 
-  mutate(pc_2022 = round(beneficiaries / sum(beneficiaries) * 100, digits = 2)) %>% 
-  right_join(fsc_2021 %>% 
-              filter(unique_beneficiaries == "Yes") %>% 
-              group_by(state) %>%
-              summarise(beneficiaries_2021 = sum(beneficiaries)) %>%
-              mutate(pc_2021 = round(beneficiaries_2021 / sum(beneficiaries_2021) * 100, digits = 2)),
-            by = "state") %>% 
+  right_join(pin %>% group_by(state, admin1_pcode) %>% 
+               summarise(target = sum(fs_targeted, na.rm = TRUE),
+                         beneficiaries_2021 = sum(beneficiaries_2021, na.rm = TRUE), .groups = "drop"),
+            by = c("admin1_pcode", "state")) %>% 
+  mutate(state = fct_reorder(state, -beneficiaries),
+         pc_reached = round(beneficiaries / target * 100, digits = 2)) %>% 
+  mutate(pc_2022 = round(beneficiaries / sum(beneficiaries, na.rm = TRUE) * 100, digits = 2), 
+         pc_2021 = round(beneficiaries_2021 / sum(beneficiaries_2021, na.rm = TRUE) * 100, digits = 2)) %>%
   arrange(desc(pc_2022)) %>% 
+  filter(state %out% c("Bago (West)", "Nay Pyi Taw")) %>% 
   select(State = state, Beneficiaries_2021 = beneficiaries_2021, `%_ben_2021` = pc_2021, 
-         Beneficiaries_2022 = beneficiaries, `%_ben_2022` = pc_2022) %>% 
+         Beneficiaries_2022 = beneficiaries, `%_ben_2022` = pc_2022, `%_target_2022` = pc_reached) %>%
   kable(caption = "Skew in Q1 2022 geographic reach, comparison with 2021 data", format.args = list(big.mark = ",")) %>%
   column_spec(3, color = "white", background = spec_color(state_ord_2021$beneficiaries[1:16], end = 0.8, direction = -1)) %>%
   column_spec(5, color = "white", background = spec_color(state_ord$beneficiaries[1:16], end = 0.8, direction = -1)) %>%
+  column_spec(6, color = "white", background = spec_color(state_ord$pc_reached[1:16], option = "mako", end = .8, direction = -1)) %>% 
   kable_classic_2("striped")
+  
 
   
-  
 ```
+
 
 <br><br>
 
@@ -1263,8 +1276,8 @@ fsc %>%
   geom_line(size = 0.5) + 
   scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   scale_y_continuous(labels = comma) +
-  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2021-06-01"))) +
-  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-01-01"))) +
+  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2021-06-01")), alpha = .5) +
+  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-01-01")), alpha = .5) +
   facet_wrap(~ fct_rev(fct_reorder(org_code, cum_ben, max)), scales = "free_y") +
   theme(legend.position = "none",
         axis.text.x = element_text(size = 3.5, angle = 60),
@@ -1466,7 +1479,6 @@ fsc %>%
 
 
 ```
-
 
 
 

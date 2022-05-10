@@ -1,0 +1,104 @@
+"0","fsc_2021 <- read_csv(""fsc5w_2021.csv"") %>%
+  mutate(activity_new = 
+           case_when(str_detect(activity_description, ""Local Chicken support"") ~
+                       ""provision of livestock kits"",
+                     activity == ""Cash for Work / Food for Assets"" ~
+                       ""food/cash for work/assets"",
+                     str_detect(activity_description, ""home|Home"") & 
+                       !str_detect(activity_description, ""training|Training|Training,"") ~
+                       ""provision of kitchen garden kits"",
+                     activity == ""Provide crops & vegetables kits"" & 
+                       str_detect(activity_description, ""pumps|till|drum|Tiller|Drum"") ~ 
+                       ""provision of community infrastructure and equipment"",
+                     activity == ""Provide crops & vegetables kits"" ~ 
+                       ""provision of crop, vegetable and seed kits"",
+                     activity == ""Provide fishery kits"" ~ 
+                       ""provision of fishery kits"",
+                     activity == ""Provide livestock kits"" ~ 
+                       ""provision of livestock kits"",
+                     activity %in% c(""Provide monthly cash-based transfers"", ""Provide monthly food baskets"") & 
+                       str_detect(activity_description, ""Lifesaving|lifesaving|acute|Acute"") ~ 
+                       ""food distributions (in kind/voucher/cash), severe"",
+                     # what to do about MVC, malnourished children and PLW?
+                     activity %in% c(""Provide monthly cash-based transfers"", ""Provide monthly food baskets"")  ~
+                       ""food distributions (in kind/voucher/cash), moderate"",  
+                     activity == ""Provide support for income generation"" & 
+                       !str_detect(activity_description, ""agriculture input|farming"") ~
+                       ""income-generating activities and small grants"",
+                     activity  == ""Provide support for income generation""  ~
+                       ""income-generating activities and small grants"",
+                     activity == ""Provide technical training"" & str_detect(activity_description,
+                                               ""farm|Farm|FFS|pesticide|ferti|agri|Agri|gardening|Seed|seed|SSA"") ~
+                       ""FFS and farmer training"",
+                     activity == ""Provide technical training"" ~ ""vocational training"",
+                     activity_description %in% c(""Provide Voucher Cards to buy agriculture inputs for their agricultural works"",
+                                                 ""Cash for farming (Livestock and Agri)"") ~
+                       ""provision of crop, vegetable and seed kits"", 
+                     TRUE ~ NA_character_)) %>% 
+   mutate(activity_red = case_when(activity_new %in% c(""food distributions (in kind/voucher/cash), moderate"",
+                                                   ""food distributions (in kind/voucher/cash), severe"") ~
+                                     ""food distribution"",
+                                  activity_new %in% c(""multi-purpose cash transfer (MPC), moderate"",
+                                                  ""multi-purpose cash transfer (MPC), severe"") ~ 
+                                    ""multi-purpose cash transfer"",
+                                  activity == ""livelihoods vocational training"" ~ ""vocational training"",
+                                  activity == ""food/cash for work/assets"" ~ ""food_cash for work_assets"",
+                                  activity == ""income-generating activities and small grants"" ~ ""IGA and small grants"",
+                                  TRUE ~ activity_new)) %>% 
+  mutate(strat_obj = case_when(activity_red %in% c(""food distribution"", ""multi-purpose cash transfer"") & 
+                          beneficiary_type == ""Internally Displaced"" ~ 
+                          ""so_1"", 
+                        activity_red %in% c(""food distribution"", ""multi-purpose cash transfer"") & 
+                          beneficiary_type != ""Internally Displaced"" ~ 
+                          ""so_2"", 
+                        TRUE ~ ""so_3"")) %>% 
+  mutate(activity_red = recode(activity_red, 
+                                       ""food/cash for work/assets"" = ""food_cash for work_assets"", 
+                                       ""provision of crop, vegetable and seed kits"" = ""crop, vegetable and seed kits"",
+                                       ""provision of livestock kits"" = ""livestock kits"",
+                                       ""income-generating activities and small grants"" = ""IGA and small grants""), 
+         activity_red = str_remove_all(activity_red, ""provision of "")) %>% 
+   mutate(usd_per_hhd = total_value_usd / households, 
+         usd_per_person = total_value_usd / beneficiaries) %>% 
+  mutate(usd_hhd_bin = case_when(new_value_hhd < 10 ~ ""<$10"",
+                     new_value_hhd >= 10 & new_value_hhd < 20 ~ "">=$10_<$20"",
+                     new_value_hhd >= 20 & new_value_hhd < 30 ~ "">=$20_<$30"",
+                     new_value_hhd >= 30 & new_value_hhd < 40 ~ "">=$30_<$40"",
+                     new_value_hhd >= 40 & new_value_hhd < 50 ~ "">=$40_<$50"",
+                     new_value_hhd >= 50 & new_value_hhd < 60 ~ "">=$50_<$60"",
+                     new_value_hhd >= 60 & new_value_hhd < 70 ~ "">=$60_<$70"",
+                     new_value_hhd >= 70 & new_value_hhd < 80 ~ "">=$70_<$80"",
+                     new_value_hhd >= 80 & new_value_hhd < 90 ~ "">=$80_<$90"",
+                     new_value_hhd >= 90 & new_value_hhd < 100 ~ "">=$90_<$100"",
+                     new_value_hhd >= 100 ~ "">=$100"",
+                     TRUE ~ NA_character_),
+         usd_hhd_bin = fct_relevel(usd_hhd_bin, c(""<$10"", "">=$10_<$20"", "">=$20_<$30"", "">=$30_<$40"", "">=$40_<$50"","">=$50_<$60"", 
+                                                  "">=$60_<$70"", "">=$70_<$80"", "">=$80_<$90"","">=$90_<$100"","">=$100""))) %>% 
+  mutate(usd_person_bin = case_when(new_value_person < 2 ~ ""<$2"",
+                                 new_value_person >= 2 & new_value_person < 4 ~ "">=$2_<$4"",
+                                 new_value_person >= 4 & new_value_person < 6 ~ "">=$4_<$6"",
+                                 new_value_person >= 6 & new_value_person < 8 ~ "">=$6_<$8"",
+                                 new_value_person >= 8 & new_value_person < 10 ~ "">=$8_<$10"",
+                                 new_value_person >= 10 & new_value_person < 12 ~ "">=$10_<$12"",
+                                 new_value_person >= 12 & new_value_person < 14 ~ "">=$12_<$14"",
+                                 new_value_person >= 14 & new_value_person < 16 ~ "">=$14_<$16"",
+                                 new_value_person >= 16 & new_value_person < 18 ~ "">=$16_<$18"",
+                                 new_value_person >= 18 & new_value_person < 20 ~ "">=$18_<$20"",
+                                 new_value_person >= 20 ~ "">=$20"",
+                     TRUE ~ NA_character_), 
+         usd_person_bin = fct_relevel(usd_person_bin, c(""<$2"", "">=$2_<$4"", "">=$4_<$6"", "">=$6_<$8"", "">=$8_<$10"","">=$10_<$12"", 
+                                                  "">=$12_<$14"", "">=$14_<$16"", "">=$16_<$18"", "">=$18_<$20"","">=20"")))
+"
+"2","[1mRows: [22m[34m16041[39m [1mColumns: [22m[34m72[39m
+"
+"2","[36m--[39m [1mColumn specification[22m [36m------------------------------------------------------------------------------------------------------------------------[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m  (46): month_of_implementation, donor, reporting_organization_type, implementing_partner_type, state, township, village_ward_town, camp,...
+[32mdbl[39m  (25): quantity_for_in_kind_assistance, value_per_household, value_per_household_usd, total_value_usd, total_value_mmk, child_male, chil...
+[34mdate[39m  (1): date
+"
+"2","
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m to retrieve the full column specification for this data.
+[36mi[39m Specify the column types or set [38;5;235m[48;5;253m[38;5;235m[48;5;253m`show_col_types = FALSE`[48;5;253m[38;5;235m[49m[39m to quiet this message.
+"
+"2","Warning: Unknown levels in `f`: >=20"

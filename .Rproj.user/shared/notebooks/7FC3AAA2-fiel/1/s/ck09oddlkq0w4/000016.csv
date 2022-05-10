@@ -1,0 +1,5 @@
+"0","iris %>%  group_by(Species, Petal.Width) %>% 
+  summarise(mean = mean(Petal.Length))
+"
+"2","`summarise()` has grouped output by 'Species'. You can override using the `.groups` argument.
+"

@@ -1,0 +1,19 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-05-09'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=9, message = TRUE, warning=TRUE)
+library(tidyverse)
+```
+
+```{r}
+glimpse(iris)
+
+iris %>%  group_by(Species, Petal.Width) %>% 
+  summarise(mean = mean(Petal.Length))
+
+```
+

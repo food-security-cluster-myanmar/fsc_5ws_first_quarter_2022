@@ -299,3 +299,17 @@ fsc %>%
   relocate(`%_beneficiaries`, .after = beneficiaries) %>% 
   kable(caption = "Breakdown of agricultural and non-agricultural activities", format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped")
+
+# everyone in yangon just got 50kg of rice
+fsc %>%  filter(state == "Yangon") %>% 
+  count(unit)
+sample_n(10) %>% 
+  pull(unit, quantity)
+
+fsc %>%  filter(state == "Yangon") %>% 
+  mutate(kg = ifelse(unit == "MT", quantity * 1000, NA_real_), 
+         kg_per_hhd = kg / households) %>% 
+  ggplot(aes(x = kg_per_hhd)) + 
+  geom_histogram()
+summarise(kg_per_hhd = mean(kg_per_hhd))
+

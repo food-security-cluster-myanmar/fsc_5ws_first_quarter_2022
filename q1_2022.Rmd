@@ -372,7 +372,7 @@ fsc %>%
          Total = Development + Humanitarian, 
          strat_obj = str_to_upper(strat_obj)) %>%
   adorn_totals("row") %>% 
-  kable(caption = "2022 beneficiaries by strategic objective", format.args = list(big.mark = ",")) %>% 
+  kable(caption = "2022/Q1 beneficiaries by strategic objective", format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped", full_width = FALSE)
 
 
@@ -380,18 +380,19 @@ fsc %>%
 
 <br>
 
-In terms of activities, the number of beneficiaries reached is heavily skewed towards food distributions. More than 95% of beneficiaries in 2022 have been reached by this activity. 
+In terms of activities, the number of beneficiaries reached is heavily skewed towards food distributions. More than 95% of beneficiaries in 2022/Q1 have been reached by this activity. 
 
 ```{r table-beneficiaries-activity}
 fsc %>%  
+  mutate(strat_obj = str_to_upper(strat_obj)) %>% 
   sum_ben2(strat_obj, activity_red) %>% 
   arrange(desc(beneficiaries)) %>% 
   pivot_wider(names_from = strat_obj, values_from = beneficiaries, values_fill = 0, names_prefix = "ben_") %>% 
-  mutate(Total = ben_so_1 + ben_so_2 + ben_so_3, 
+  mutate(Total = ben_SO_1 + ben_SO_2 + ben_SO_3, 
          `%_ben` = round(Total / sum(Total) * 100, digits = 2)) %>% 
-  relocate(ben_so_1, .after = activity_red) %>% 
+  relocate(ben_SO_1, .after = activity_red) %>% 
   rename(activity = activity_red) %>% 
-  kable(caption = "Breakdown of beneficiaries by activity", format.args = list(big.mark = ",")) %>% 
+  kable(caption = "Breakdown of beneficiaries by activity in 2022/Q1", format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped")
 ```
 
@@ -401,12 +402,13 @@ fsc %>%
 
 ```{r table-nutrition-mainstreaming}
 fsc %>% 
+  mutate(strat_obj = str_to_upper(strat_obj)) %>% 
   mutate(was_nutrition_mainstreamed_in_activity = ifelse(is.na(was_nutrition_mainstreamed_in_activity), 
                                                          "No", was_nutrition_mainstreamed_in_activity), 
          was_nutrition_mainstreamed_in_activity = fct_relevel(was_nutrition_mainstreamed_in_activity, levels = c("Yes", "No"))) %>% 
   sum_ben2(strat_obj, was_nutrition_mainstreamed_in_activity) %>% 
   pivot_wider(names_from = strat_obj, values_from = beneficiaries) %>% 
-  mutate(total_beneficiaries = so_1 + so_2 + so_3, 
+  mutate(total_beneficiaries = SO_1 + SO_2 + SO_3, 
          `%_beneficiaries` = round(total_beneficiaries / sum(total_beneficiaries) * 100, digits = 2)) %>% 
   kable(caption = "Breakdown of benefeciaries by status of nutrition mainstreaming", format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped")
@@ -456,7 +458,7 @@ fsc %>%
 
 <br>
 
-The table below outlines the number of beneficiaries reached by state/region in both 2021 and 2022. In 2021, the response was heavily skewed towards Yangon and Rakhine. The bias is even more pronounced in 2022. As will be discussed in the next section, this is a misallocation of resources as many of the areas reached in Yangon and Rakhine are already heavily oversubscribed and the reach is multiple times the target. 
+The table below outlines the number of beneficiaries reached by state/region in both 2021 and 2022/Q1. In 2021, the response was heavily skewed towards Yangon and Rakhine. The bias is even more pronounced in 2022/Q1. 
 
 `r round(filter(fsc, state %in% c("Yangon", "Rakhine")) %>% {sum(.$new_beneficiaries, na.rm = TRUE)} / sum(fsc$new_beneficiaries, na.rm = TRUE) * 100, digits = 2)`% of beneficiaries reached in the first quarter of 2022 originated from Yangon or Rakhine. 
 
@@ -556,7 +558,7 @@ fsc %>%
   arrange(desc(pct_of_total)) %>% 
   select(State = state, Township = township, Humanitarian = humanitarian, Development = development,
          Beneficiaries = beneficiaries, `%_Total` = pct_of_total) %>% 
-  kbl(caption = "Top 7 townships by beneficiaries reached (desc)", format.args = list(big.mark = ",")) %>% 
+  kbl(caption = "Top 7 townships by beneficiaries reached (desc) in 2022/Q1", format.args = list(big.mark = ",")) %>% 
   column_spec(6, color = "white", background = spec_color(tsp_ord$beneficiaries[1:8], end = 0.8, direction = -1)) %>%
   kable_classic_2(lightable_options = c("striped")) %>% 
   footnote("The 55 other townships are each less than 1.5% of the total", 
@@ -588,8 +590,8 @@ fsc %>%
   facet_wrap(~ activities) +
   labs(y = "number of locations",
        x = "Beneficiary frequencies per location", 
-       title = "Histograms of number of beenficiaries by location",
-       subtitle = "Faceted by number of FSC activities per location")
+       title = "Histograms of locations, faceted by number of activities",
+       subtitle = "X-axis shows number of beneficiaries")
 ```
 
 <br>
@@ -612,8 +614,8 @@ fsc %>%
   facet_wrap(~ partners) +
   labs(y = "number of locations",
        x = "beneficiaries per location", 
-       title = "Histograms of beneficiaries by location",
-       subtitle = "Faceted by number of partners per location")
+       title = "Histograms of locations, faceted by number of partners",
+       subtitle = "X-axis shows number of beneficiaries")
 
 ```
 
@@ -641,7 +643,7 @@ fsc %>%
 
 ### 2.1 Progress by activity 
 
-The first red line below shows the the approval of the IERP in June 2021 and the second red line shows the start of 2022. 
+The first grey line below shows the the approval of the IERP in June 2021 and the second red line shows the start of 2022. 
 
 <br>
 
@@ -679,10 +681,11 @@ fsc %>%
 
 <br>
 
-Community infrastructure and equipment, fishery kits and kitchen garden kits have not been implemented in 2022. Income-generating activities, which were largely stagnant since the approval of the IERP, started to increase again in 2022; this might be due to the seasonality of the interventions under this category. 
+Community infrastructure and equipment, fishery kits and kitchen garden kits have not been implemented in 2022/Q1. Income-generating activities, which were largely stagnant since the approval of the IERP, started to increase again in 2022/Q1. This might be due to the seasonality of the interventions under this category. 
 
-Food distributions (in-kind and CBT/CVA) continued to be the largest activity from 2021 into 2022. Multi-purpose cash transfers was new activity that was not present in 2021. 
+Food distributions (in-kind and CBT/CVA) continued to be the largest activity from 2021 into 2022/Q1. Multi-purpose cash transfers was new activity that was not present in 2021. 
 
+It should, however, be noted that the beneficiaries of food distributions in Yangon were provided with 50kg/household, typically a one-shot intervention. The sustainability of such interventions should be questioned, as, unlike Sagaing, Magway and other conflict-affected states, there are no access restrictions in Yangon preventing the implementation of longer-term livelihoods-focused interventions that would address the core causes of food insecurity. 
 
 <br><br>
 
@@ -706,7 +709,7 @@ fsc %>%
   mutate(`%_beneficiaries` = round(beneficiaries / sum(beneficiaries) * 100, digits = 2), 
          agricultural_activity = fct_rev(agricultural_activity)) %>% 
   relocate(`%_beneficiaries`, .after = beneficiaries) %>% 
-  kable(caption = "Benefficiary frequencies reached by agricultural and non-agricultural activities", 
+  kable(caption = "Beneficiary frequencies reached by agricultural and non-agricultural activities", 
         format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped")
 ```
@@ -743,17 +746,17 @@ fsc %>%
                                       "Rakhine", "Shan (North")), 
              y = beneficiaries, fill = activity_red)) + 
   geom_col() + 
-  geom_text(data = ag_labels, aes(label = comma(beneficiaries), fill = NULL), size = 4, vjust = -.3) + 
-  labs(x = "", y = "Beneficiary frequencies", 
-       title = "Breakdown of beneficiaries of agricultural activities")
+  geom_text(data = ag_labels, aes(label = comma(beneficiaries), fill = NULL), size = 3, vjust = -.3) + 
+  labs(x = "", y = "Beneficiary frequencies", fill = "", 
+       title = "Breakdown of beneficiaries of agricultural activities in 2022/Q1")
 
 ```
 
-
+<br><br>
 
 ### 2.3 Delivery modalities
 
-The plots below, faceted by delivery modality, show the breakdown of activities by delivery modality. All activities besides food distribution correpsonded to only one type of delivery modality.  
+The plots below, faceted by delivery modality, show the breakdown of activities by delivery modality. All activities besides food distribution corresponded to only one type of delivery modality.  
 
 ```{r facet-delivery-modalities}
 fsc %>% 
@@ -785,7 +788,7 @@ fsc %>%
 
 <br>
 
-There are also clear differences between the different location types and the delivery modalities employed with them. Rural vilalges were predominated by in-kind distributions whilst camps and IDP sites were mostly targeted with cash-based interventions. 
+There are also clear differences between the different location types and the delivery modalities employed with them. Rural areas were predominated by in-kind distributions whilst camps and IDP sites were mostly targeted with cash-based interventions. 
 
 ```{r facet-location}
 
@@ -799,7 +802,9 @@ fsc %>%
   geom_col() + 
   scale_y_continuous(labels = comma) + 
   facet_wrap(~location_type, scales = "free") + 
-  theme(axis.text.x = element_text(angle = 25, vjust = .7, hjust = .5))
+  theme(axis.text.x = element_text(angle = 25, vjust = .7, hjust = .5)) +
+  labs(x = "Delivery modality", y = "Beneficiaries",
+       title = "Delivery modalities by location type")
   
 
 ```
@@ -849,7 +854,7 @@ fsc %>%
 
 ### 3.1 Cash transfer values per household
 
-```{r usd-hhd-bin-barplot}
+```{r usd-hhd-bin-barplot, fig.height=6.5}
 
 fsc %>%
   filter(!is.na(usd_per_hhd) & !is.na(new_beneficiaries)) %>% 
@@ -866,11 +871,13 @@ fsc %>%
         axis.text.x = element_text(angle = 30, hjust = 0.8, vjust = 0.9)) +
   labs(x = "USD value of cash transfer per household per month",
        y = "Number of households",
-       title = "Number of households by value of cash transfer per household (2022 1Q)",
+       title = "Number of households by value of cash transfer per household (2022/Q1)",
        subtitle = "Figures at the top of each bar show percentage of households\nOnly households reached through the cash, hybrid or voucher modalities are included")
   
 
 ```
+
+
 
 <br>
 
@@ -974,7 +981,7 @@ fsc %>% filter(!is.na(total_value_usd) & activity_red != "livestock kits") %>%
                      labels = dollar_format(accuracy = 1)) +
   theme(legend.position = "none") +
   labs(x = "USD per person", y = "", 
-       title = "Boxplots of USD transfer values per person", 
+       title = "Boxplots of USD transfer values per person in 2022/Q1", 
        subtitle = "Thick line in each box is the mean;\n Points are individual distributions, sizes of points reflect beneficiaries")
  
 ```
@@ -1013,14 +1020,14 @@ money_scatter <- fsc %>%
   scale_size_continuous(guide = "none", range = c(0.3, 10)) + 
   labs(x = "Beneficiary frequencies", 
        y = "USD transfer value per person", 
-       title = "Average USD transfer value per person", 
+       title = "Average USD transfer value per person in 2022/Q1", 
        subtitle = "By organisation, location and activity", 
        colour = "") + 
   theme(legend.text = element_text(size = 5)) + 
   guides(colour = guide_legend(override.aes = list(size = 1, alpha = 1)))
 
 ggplotly(money_scatter, tooltip = c("text"), width = 820) %>% 
-  layout(title = list(text = paste0("Average USD transfer value per person",
+  layout(title = list(text = paste0("Average USD transfer value per person in 2022/Q1",
                                     "<br>",
                                     "<sup>",
                                     "By organisation, location and activity; double-click on legend to select","</sup>")))
@@ -1040,7 +1047,7 @@ As mentioned, food distributions had the tightest range of transfer values, with
 
 The interactive plot below breaks down the range of USD per person cash transfer values by state. Similar to the plot above, each point is a distribution and more details about each distribution can be seen by hovering your mouse over each point. 
 
-The red line indicates 50% of the monthly expenditure basket (MEB) for food. The vast majority of transfers fall below this value. 
+The red line indicates 50% of the monthly expenditure basket (MEB) for food (divided by 5 to get the figure per person). The vast majority of transfers fall below this value. 
 
 <br> 
 
@@ -1063,11 +1070,11 @@ food_dist_range <- fsc %>%
   scale_x_continuous(breaks = seq(0, 90, by = 10), labels = dollar_format(accuracy = 1)) +
   labs(x = "USD value per person", 
        y = "", 
-       title = "Food distribution: range of USD values per person by state",
+       title = "Food distribution: range of USD values per person by state in 2022/Q1",
        size = "", colour = "") 
 
 ggplotly(food_dist_range, tooltip = c("text"), width = 820, height =  600) %>% 
-  layout(title = list(text = paste0("Food distribution: range of USD values per person by state",
+  layout(title = list(text = paste0("Food distribution: range of USD values per person by state in 2022/Q1",
                                     "<br>",
                                     "<sup>",
                                     "The red line is 50% of 1/5 of food MEB; double-click on legend to select","</sup>")), 
@@ -1076,13 +1083,12 @@ ggplotly(food_dist_range, tooltip = c("text"), width = 820, height =  600) %>%
 
 <br>
 
-Kachin and Shan notably have several extreme outliers much higher than the average for that state. Kayin, however, has a very large number of beneficiaries who received less the USD 1/person. Distributions in Chin had veyr consistent values as they were all implemented by the same implementing partner. 
+Kachin and Shan notably have several extreme outliers much higher than the average for that state. Kayin, however, has a very large number of beneficiaries who received less the USD 1/person. Distributions in Chin had very consistent values as they were all implemented by the same implementing partner. 
 
 The table below compares the different bins for cash transfer values of food distributions with the minimum expenditure basket for food established by the Cash Working Group. They have established a floor of MMK 190,555 (or USD 114.55). 
 
 Overall, `r round((filter(fsc, usd_per_person >= (114.55 / 5) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) / (filter(fsc, !is.na(usd_per_person) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) * 100, digits = 2)`% of food distribution beneficiaries have received at least 100% of the MEB and `r round((filter(fsc, usd_per_person >= (114.55 / 5 / 2) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) / (filter(fsc, !is.na(usd_per_person) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) * 100, digits = 2)`% have received at least 50% of the MEB. 
 
-<br>
 
 ```{r table-meb-usd-hhd-bin}
 
@@ -1129,8 +1135,6 @@ fsc_2021 %>%
 
 ```
 
-With reference to the plot below, the per person USD values in 2022 are more consistent than in 2021, with more than 50% of beneficiary frequencies receiving between USD 8 and 10 per transfer. The average transfer value for food distributions in 2021 was USD 7.36; in 2022, it was USD 8.59. 
-
 <br>
 
 ```{r barplot-2021-2022}
@@ -1155,10 +1159,13 @@ fsc %>%
   scale_fill_viridis_d(option = "cividis", guide = guide_legend(reverse = TRUE), direction = -1) +
   labs(x = "% of beneficiaries", y = "", fill = "", 
        title = "Comparison between food distribution cash transfer values", 
-       subtitle = "2021 vs 2022")
+       subtitle = "2021 vs 2022/Q1")
 
 ```
 
+<br>
+
+With reference to the plot above, the per person USD values in 2022 are more consistent than in 2021, with more than 50% of beneficiary frequencies receiving between USD 8 and 10 per transfer. The average transfer value for food distributions in 2021 was USD 7.36; in 2022/Q1, it was USD 8.59. 
 
 <br><br><br>
 
@@ -1183,7 +1190,7 @@ fsc %>%
   scale_fill_discrete(guide = "none") +
   labs(x = "Beneficiary type",
        y = "Number of beneficiaries", 
-       subtitle = "Persons reached by beneficiary type")
+       subtitle = "Persons reached by beneficiary type in 2022/Q1")
 
 # ggsave("beneficiary_type_q1_2022.png", dpi = 300, height = 5, width = 8, units = "in")
 ```
@@ -1202,7 +1209,7 @@ fsc %>%
   group_by(food_insecurity_status) %>% 
   summarise(beneficiaries = sum(new_beneficiaries)) %>% 
   mutate(`%_benficiaries` = round(beneficiaries / sum(beneficiaries) * 100, digits = 2)) %>% 
-  kable(caption = "Food insecurity status and evidence provided", 
+  kable(caption = "Food insecurity status and evidence provided in 2022/Q1", 
         format.args = list(big.mark = ",")) %>% 
   kable_classic_2(full_width = FALSE)
   
@@ -1223,7 +1230,7 @@ fsc %>%
   group_by(evidence) %>% 
   summarise(beneficiaries = sum(new_beneficiaries)) %>% 
   mutate(`%_beneficiaries` = round(beneficiaries / sum(beneficiaries) * 100, digits = 2)) %>% 
-  kable(caption = "Breakdown of evidence of food insecurity status", 
+  kable(caption = "Breakdown of evidence of food insecurity status in 2022/Q1", 
         format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped", full_width = FALSE)
 ```
@@ -1265,7 +1272,7 @@ Due to the problems in reporting disaggregated beneficiary data, two tests have 
 
 The plots below show the breakdowns between the "real" values and those that have been backfilled from the census. Approximately 59% of beneficiaries reported had "real" disaggregations; this is an improvement from 2021, where only 44% of beneficiaries had "real" disaggregations. 
 
-In the "real" values, it can be seen that the proportion of adult females reached is much higher than adult males -- this is in line with the CLuster's udnerstanding of several activities that specifically target women. The percentages of elderly persons actually reached is also much lower than what has been reported. 
+In the "real" values, it can be seen that the proportion of adult females reached is much higher than adult males -- this is in line with the Cluster's understanding of several activities that specifically target women. The percentages of elderly persons actually reached is also much lower than what has been reported. 
 
 <br>
 
@@ -1371,7 +1378,7 @@ partner_scatter <- fsc %>%
                            "townships: ", townships, "\n", 
                            "beneficiaries: ", comma(beneficiaries, accuracy = 1)))) + 
   geom_point(aes(size = beneficiaries), alpha = .7) + 
-  scale_x_continuous(trans = "log", labels = comma, breaks = c(0, 100, 300, 1000, 3000, 10000, 100000, 300000)) +
+  scale_x_continuous(trans = "log", labels = comma, breaks = c(0, 100, 300, 1000, 3000, 10000, 30000, 100000, 300000)) +
   scale_y_continuous(breaks = seq(0, 25, 5)) +
   labs(x = "Number of beneficiaries",
        y = "Number of townships",
@@ -1389,7 +1396,7 @@ ggplotly(partner_scatter, tooltip = c("text"), width = 820) %>%
 
 <br>
 
-In 2021, it was noted that whilst there was much variation in the numbers of beneficiaries reached by each implementing partner, their geographic footprints were quite limited. This pattern has continued into 2022. Only `r fsc %>% group_by(org_code) %>% summarise(townships = n_distinct(admin3_pcode)) %>% filter(townships > 5) %>% nrow()` partners (17% of the total) have a presence in more than 5 townships. The distribution of partners remains an impediment to the implmentation of a countrywide response. And the following steps mentioned in the 2021 report are still very necessary: 
+In 2021, it was noted that whilst there was much variation in the numbers of beneficiaries reached by each implementing partner, their geographic footprints were quite limited. This pattern has continued into 2022/Q1. Only `r fsc %>% group_by(org_code) %>% summarise(townships = n_distinct(admin3_pcode)) %>% filter(townships > 5) %>% nrow()` partners (17% of the total) have a presence in more than 5 townships. The distribution of partners remains an impediment to the implementation of a countrywide response. And the following steps mentioned in the 2021 report are still very necessary: 
 
 * Incentivise partners to expand their footprints
 
@@ -1431,7 +1438,7 @@ fsc %>%
         strip.text = element_text(size = 4.5, face = "bold")) + # see if this works when you knit, then do it for the other plots 
   labs(x = "Month", 
        y = "Cumulative beneficiaries", 
-       title = "Monthly progress of top 20 implementing partners, 2021-2022", 
+       title = "Monthly progress of top 20 implementing partners, 2021-2022/Q1", 
        subtitle = "Figures show cumulative unique beneficiaries") + 
   theme(plot.title = element_text(size = 11))
 
@@ -1440,7 +1447,7 @@ fsc %>%
 
 <br>
 
-Overall, 13 implementing partners increased the number of beneficiaries reached over their 2021 totals by more than 50%; 29 partners who reported in 2021 also reported in 2022. 7 new implementing partners reported in 2022. And 28 partners who reported in 2021 but have not yet any achievements in 2022. 
+Overall, 13 implementing partners increased the number of beneficiaries reached over their 2021 totals by more than 50%; 29 partners who reported in 2021 also reported in 2022/Q1. 7 new implementing partners reported in 2022. And 28 partners who reported in 2021 but have not yet any achievements in 2022. 
 
 ```{r}
 fsc %>%
@@ -1461,7 +1468,7 @@ fsc %>%
   arrange(desc(ben_2022)) %>% 
   select(org_code, ben_2021, rank_2021, ben_2022, rank_2022, total_ben) %>% 
   head(20) %>% 
-  kable(caption = "Top implementing partners by beneficiaries reached in 2022", format.args = list(big.mark = ",")) %>% 
+  kable(caption = "Top implementing partners by beneficiaries reached in 2022/Q1", format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped") 
 ```
 
@@ -1469,7 +1476,7 @@ fsc %>%
 
 ### 5.2 Donors
 
-As shown by the table below, the majority of beneficiaries reported in the first quarter of 2022 were reported without any corresponding donor, as in 2021. The data in this column continues of limited utility in anaylsis. 
+As shown by the table below, the majority of beneficiaries reported in the first quarter of 2022/Q1 were reported without any corresponding donor, as in 2021. The data in this column continues of limited utility in analysis. 
 
 ```{r table-donors}
 fsc %>% 
@@ -1496,7 +1503,7 @@ fsc %>%
 
 ### 6.2 Township-level reach scatterplot
 
-The specifics of each township can be reviewed with the interactive plot below. Each point is a township, with the size indicating the number of beneficiaries. The x-axis indicates the target population by township and the y-axis shows the number of beneficiaries reached in 2022. 
+The specifics of each township can be reviewed with the interactive plot below. Each point is a township, with the size indicating the number of beneficiaries. The x-axis indicates the target population by township and the y-axis shows the number of beneficiaries reached in 2022/Q1. 
 
 The red line down the middle represents reaching 100% of the target. Townships above this line have reached more beneficiaries than their target and townships below the line have not met their target yet. The further away a township is from the red line, the further above or below its target it is. Mouse over each of the townships to see more details. 
 
@@ -1547,7 +1554,7 @@ ggplotly(ben_target, tooltip = c("text"), width = 820, height = 500) %>%
 
 <br><br>
 
-### 6.2 Map of beneficiaries reached vs 2022 target
+### 6.2 Map of beneficiaries reached in 2022/Q1 vs target
 
 ```{r maps-ben-target, fig.height=9}
 fsc %>% 
@@ -1595,7 +1602,7 @@ With the important exceptions of Yangon and the Southeast, beneficiaries are con
 
 ### 6.3 Interactive reference table
 
-There was an overallocation of resources in these relatively few areas in 2021 and this has continued in 2022. In the interactive table below, is a list of townships sorted by the gap between the targeted population and beneficiaries reached in 2022. Any of the columns can be sort; the search bars above each column can also assist in filtering. 
+There was an overallocation of resources in these relatively few areas in 2021 and this has continued in the first quarter of 2022. In the interactive table below, is a list of townships sorted by the gap between the targeted population and beneficiaries reached in 2022. Any of the columns can be sort; the search bars above each column can also assist in filtering. 
 
 <br>
 

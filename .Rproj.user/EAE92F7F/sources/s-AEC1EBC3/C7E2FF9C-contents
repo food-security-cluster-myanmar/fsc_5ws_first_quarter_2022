@@ -1,5 +1,5 @@
 ---
-title: "Snapshot report on the 5Ws"
+title: "Report on 5Ws"
 subtitle: "First quarter 2022"
 author: "Myanmar Food Security Cluster"
 date: "2022-05-06"
@@ -415,10 +415,11 @@ fsc %>%
   
 ```
 
+<br><br>
 
 ### Implementation of Information Sharing Protocols 
 
-The newly approved ICCG 
+The newly approved ICCG Information Sharing Protocols have been implemented in this report to support the safe, ethical and effective management of data within Myanmar. This implementation is most evident in the use of partner pseudonymisation in this report. Partner names have been replaced by tokens in this report. These tokens are stored in a secure translation table on OCHA servers outside of Myanmar, where they may not be requisitioned by authorities. For more information, please read the full text of the protocols in either [English](https://www.dropbox.com/s/11kv6cvnbvx9hbe/information_sharing_protocol_220323.pdf?dl=0) or [Myanmar](https://www.dropbox.com/s/lqwvo7k80s1xnjj/SE%20partner%20data%20protection_final_220323%20translation.pdf?dl=0). 
 
 <br><br><br>
 
@@ -1408,7 +1409,7 @@ In 2021, it was noted that whilst there was much variation in the numbers of ben
 
 ### 5.1 Monthly progress by partner
 
-```{r}
+```{r partner-progress-facet-line}
 
 partner_top <- fsc %>% 
   sum_ben(org_code) %>% arrange(desc(beneficiaries)) %>%  mutate(org_code = reorder(org_code, -beneficiaries)) %>% pull(org_code) %>% head(20)

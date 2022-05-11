@@ -836,7 +836,7 @@ fsc %>%
 
 ### 3.1 Cash transfer values per household
 
-```{r usd-hhd-bin-barplot, fig.height=6.5}
+```{r usd-hhd-bin-barplot, fig.height=6}
 
 fsc %>%
   filter(!is.na(usd_per_hhd) & !is.na(new_beneficiaries)) %>% 
@@ -863,7 +863,7 @@ fsc %>%
 
 <br>
 
-46% of households received less than USD 40/month per transfer. However, the most common transfer values were between USD 40/month and USD 70/month, with 47% of households receiving transfers in this range. This aligns fairly well with 50% of the Minimum Expenditure Basket for food expenditures (USD 52.28/household/month). 
+46% of households received less than USD 40/month per transfer. However, the most common transfer values were between USD 40/month and USD 70/month, with 47% of households receiving transfers in this range. This aligns fairly well with 50% of the Minimum Expenditure Basket for food expenditures (USD 52.28/household/month). It should be noted, however that the value of the Minimum Expenditure Basket (calculated for 2021) needs to be revised as the Food Security Cluster anticipates 40% inflation in 2022. 
 
 The table below shows the average USD values per transfer per household by and total transfer values per activity in the first quarter of 2022.
 
@@ -898,6 +898,7 @@ The plots below show average cash transfer values by activity of the partners wh
 The x-axis shows the average value per person or per household, depending on the activity and the colour indicates the number of beneficiaries reached. 
 
 <br>
+
 
 ```{r partner-cash-values, fig.height=6.5}
 partner_mean_usd <- function(tbl, name){
@@ -975,7 +976,7 @@ Additionally, each of the bubbles indicate an individual distribution, with thei
 
 Despite being the activity which reached the most beneficiaries, food distributions have one of the tightest ranges of transfer values, though, as will be explored further in the plot below and in the next section, there are substantial outliers. 
 
-The x-axis indicates the number of beneficiaries reached and the y-axis indicates the per-person value of each transfer. Each point is a distribution and the size of each point indicates the number of beneficiaries reached. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/htmlwidget-e0905f35a4d4323f887f) of this report.
+The x-axis indicates the number of beneficiaries reached and the y-axis indicates the per-person value of each transfer. Each point is a distribution and the size of each point indicates the number of beneficiaries reached. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#cash-transfer-values-per-person) of this report.
 
 <br>
 
@@ -1028,7 +1029,7 @@ As mentioned, food distributions had the tightest range of transfer values, with
 
 ### 3.4 A closer look at food distributions
 
-The plto below breask down the range of USD per person cash transfer values by state. Similar to the plot above, each point is a distribution. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#a-closer-look-at-food-distributions) of this report. 
+The plot below breaks down the range of USD per person cash transfer values by state. Similar to the plot above, each point is a distribution. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#a-closer-look-at-food-distributions) of this report. 
 
 The red line indicates 50% of the monthly expenditure basket (MEB) for food (divided by 5 to get the figure per person). The vast majority of transfers fall below this value. 
 
@@ -1036,7 +1037,7 @@ The red line indicates 50% of the monthly expenditure basket (MEB) for food (div
 
 ```{r plotly-food-dist-range}
 
-food_dist_range <- fsc %>% 
+fsc %>% 
   filter(!is.na(usd_per_person)) %>%
   filter(activity_red == "food distribution" & usd_per_person < 60) %>% 
   ggplot(aes(x = usd_per_person, y = state, colour = state, 
@@ -1048,8 +1049,8 @@ food_dist_range <- fsc %>%
                            township, ", ", state))) + 
   geom_vline(xintercept = 11.455, lty = 2, colour = "red", alpha = .5, size = .3) + 
   geom_jitter(alpha = 0.3, aes(size = beneficiaries)) +
-  scale_colour_viridis_d() +
-  scale_size_continuous(range = c(0.3, 10)) +
+  scale_colour_viridis_d(guide = "none") +
+  scale_size_continuous(range = c(0.3, 10), labels = comma) +
   scale_x_continuous(breaks = seq(0, 90, by = 10), labels = dollar_format(accuracy = 1)) +
   labs(x = "USD value per person", 
        y = "", 
@@ -1153,7 +1154,6 @@ With reference to the plot above, the per person USD values in 2022 are more con
 
 <br><br><br>
 
-
 ## 4. Beneficiaries 
 
 ### 4.1 Beneficiary types
@@ -1201,7 +1201,8 @@ fsc %>%
 
 <br>
 
-Though evidence of food insecurity was not provided by for the vast majority of beneficiaries reached, the reasons that were provided were fairly reasonable justifications for targeting beneficiaries. Though more information should be sought on the monthly distribution reports that were used as evidence of food insecurity status to determine the exact tool used.  
+Though evidence of food insecurity was not provided by for the vast majority of beneficiaries reached, much of the evidence that was provided were reasonable justifications for targeting beneficiaries. Some good reasons included armed conflict, community-based beneficiary selection and the use of the food consumption score. 
+  
 
 ```{r}
 fsc %>% 
@@ -1220,7 +1221,7 @@ fsc %>%
 ```
 <br>
 
-The general lack of evidence of evidence of beneficiaries' food insecurity status makes it difficult to justify to affected communities and donors that the Food Security Cluster is reaching the most in need. 
+The general lack of evidence of evidence of beneficiaries' food insecurity status makes it difficult to justify to affected communities and donors that the Food Security Cluster is reaching the most in need. This highlights the need to promote a shared understanding of the response through the development of a common prioritisation tool for food security partners. 
 
 <br><br><br>
 
@@ -1347,13 +1348,13 @@ fsc_disagg %>%
 
 There are `r fsc %>% distinct(org_code) %>% nrow()` partners that were involved in direct implementation that have reported achievements in first quarter of 2022. These implementing partners corresponded to a total of `r fsc %>%  distinct(report_org_code) %>% nrow()` reporting organisations. The largest reporting organisation, org_2690, had 21 implementing partners. All other reporting organisations had 1 or 2 implementing partners.   
 
-The plot below shows the number of beneficiaries and townships reached by each implementing partner. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#htmlwidget-95847ce66d4ecc260740) of this report.
+The plot below shows the number of beneficiaries and townships reached by each implementing partner. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#reach-by-implementing-partner) of this report.
 
 <br>
 
 ```{r plotly-partner-scatter}
 
-partner_scatter <- fsc %>%  
+fsc %>%  
   group_by(org_code) %>% 
   summarise(states = n_distinct(state), 
             townships = n_distinct(admin3_pcode), 
@@ -1485,23 +1486,23 @@ fsc %>%
 
 
 
-<br><br><br>
+\newpage
 
 ## 6. Comparison with targets 
 
-### 6.2 Township-level scatterplot of reach
+### 6.2 Reached vs target by township
 
 The specifics of each township can be reviewed with the interactive plot below. Each point is a township, with the size indicating the number of beneficiaries. The x-axis indicates the target population by township and the y-axis shows the number of beneficiaries reached in 2022/Q1. 
 
 The red line down the middle represents reaching 100% of the target. Townships above this line have reached more beneficiaries than their target and townships below the line have not met their target yet. The further away a township is from the red line, the further above or below its target it is. Mouse over each of the townships to see more details. 
 
-The 12 townships along the extreme left side of the plot have beneficiaries but do not have targets. 230 townships with targets have not been reached. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/township-level-scatterplot-of-reach) of this report. 
+The 12 townships along the extreme left side of the plot have beneficiaries but do not have targets. 230 townships with targets have not been reached. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#reached-vs-target-by-township) of this report. 
 
 <br>
 
-```{r plotly-tsp-comparison-reached-target}
+```{r plotly-tsp-comparison-reached-target, fig.height=6}
 
-ben_target <- fsc %>% 
+fsc %>% 
   group_by(admin3_pcode_old) %>% 
   summarise(beneficiaries = sum(new_beneficiaries),
             partners = n_distinct(org_code)) %>% 
@@ -1590,7 +1591,7 @@ With the important exceptions of Yangon and the Southeast, beneficiaries are con
 
 ### 6.3 Interactive reference table
 
-This interactive reference table is not available in this PDF edition. Please refer to the online version of this report [here](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#htmlwidget-b1147b231fdb437722f7). 
+This interactive reference table is not available in this PDF edition. Please refer to the online version of this report [here](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#interactive-reference-table). 
 
 <br>
 

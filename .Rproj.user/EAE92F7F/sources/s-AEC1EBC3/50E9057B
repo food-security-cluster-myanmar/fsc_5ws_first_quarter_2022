@@ -5,7 +5,7 @@
     "type": "r_markdown",
     "hash": "0",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1652237038419.0,
     "source_on_save": false,
     "relative_order": 5,
@@ -13,15 +13,16 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "1592,69",
-        "scrollLine": "1578"
+        "cursorPosition": "1033,175",
+        "scrollLine": "1030",
+        "last_setup_crc32": "AEC1EBC3c5a27d91"
     },
     "folds": "",
-    "lastKnownWriteTime": 1652252841,
+    "lastKnownWriteTime": 1652256408,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1652253154883,
+    "last_content_update": 1652256408728,
     "read_only": false,
     "read_only_alternatives": []
 }

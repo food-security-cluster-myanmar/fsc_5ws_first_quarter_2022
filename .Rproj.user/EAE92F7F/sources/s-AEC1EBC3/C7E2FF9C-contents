@@ -884,7 +884,7 @@ fsc %>%
 
 <br>
 
-46% of households received less than USD 40/month per transfer. However, the most common transfer values were between USD 40/month and USD 70/month, with 47% of households receiving transfers in this range. This aligns fairly well with 50% of the Minimum Expenditure Basket for food expenditures (USD 52.28/household/month). 
+46% of households received less than USD 40/month per transfer. However, the most common transfer values were between USD 40/month and USD 70/month, with 47% of households receiving transfers in this range. This aligns fairly well with 50% of the Minimum Expenditure Basket for food expenditures (USD 52.28/household/month). It should be noted, however that the value of the Minimum Expenditure Basket (calculated for 2021) needs to be revised as the Food Security Cluster anticipates 40% inflation in 2022. 
 
 The table below shows the average USD values per transfer per household by and total transfer values per activity in the first quarter of 2022.
 
@@ -1220,7 +1220,8 @@ fsc %>%
 
 <br>
 
-Though evidence of food insecurity was not provided by for the vast majority of beneficiaries reached, the reasons that were provided were fairly reasonable justifications for targeting beneficiaries. Though more information should be sought on the monthly distribution reports that were used as evidence of food insecurity status to determine the exact tool used.  
+Though evidence of food insecurity was not provided by for the vast majority of beneficiaries reached, much of the evidence that was provided were reasonable justifications for targeting beneficiaries. Some good reasons included armed conflict, community-based beneficiary selection and the use of the food consumption score. 
+  
 
 ```{r}
 fsc %>% 
@@ -1239,7 +1240,7 @@ fsc %>%
 ```
 <br>
 
-The general lack of evidence of evidence of beneficiaries' food insecurity status makes it difficult to justify to affected communities and donors that the Food Security Cluster is reaching the most in need. 
+The general lack of evidence of evidence of beneficiaries' food insecurity status makes it difficult to justify to affected communities and donors that the Food Security Cluster is reaching the most in need. This highlights the need to promote a shared understanding of the response through the development of a common prioritisation tool for food security partners. 
 
 <br><br><br>
 

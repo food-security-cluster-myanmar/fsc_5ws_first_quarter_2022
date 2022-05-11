@@ -791,6 +791,8 @@ fsc %>%
 
 There are also clear differences between the different location types and the delivery modalities employed with them. Rural areas were predominated by in-kind distributions whilst camps and IDP sites were mostly targeted with cash-based interventions. 
 
+<br>
+
 ```{r facet-location}
 
 fsc %>%  
@@ -855,7 +857,7 @@ fsc %>%
 
 ### 3.1 Cash transfer values per household
 
-```{r usd-hhd-bin-barplot, fig.height=6.5}
+```{r usd-hhd-bin-barplot, fig.height=6}
 
 fsc %>%
   filter(!is.na(usd_per_hhd) & !is.na(new_beneficiaries)) %>% 

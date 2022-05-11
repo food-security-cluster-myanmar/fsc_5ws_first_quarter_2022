@@ -1506,7 +1506,7 @@ fsc %>%
 
 ## 6. Comparison with targets 
 
-### 6.2 Township-level reach scatterplot
+### 6.2 Reached vs target by township
 
 The specifics of each township can be reviewed with the interactive plot below. Each point is a township, with the size indicating the number of beneficiaries. The x-axis indicates the target population by township and the y-axis shows the number of beneficiaries reached in 2022/Q1. 
 

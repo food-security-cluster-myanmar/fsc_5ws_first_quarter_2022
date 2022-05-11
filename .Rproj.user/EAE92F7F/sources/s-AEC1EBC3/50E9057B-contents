@@ -733,7 +733,7 @@ fsc %>%
 
 ```
 
-<br><br>
+\newpage
 
 ### 2.3 Delivery modalities
 
@@ -889,7 +889,7 @@ avg_transfer_value %>%
 
 ```
 
-<br><br>
+\newpage
 
 ### 3.2 Cash transfer values by implementing partner
 
@@ -946,7 +946,7 @@ fsc %>% partner_mean_usd("IGA and small grants") +
   
 ```
 
-<br>
+\newpage
 
 ### 3.3 Cash transfer values per person
 
@@ -975,15 +975,13 @@ Additionally, each of the bubbles indicate an individual distribution, with thei
 
 Despite being the activity which reached the most beneficiaries, food distributions have one of the tightest ranges of transfer values, though, as will be explored further in the plot below and in the next section, there are substantial outliers. 
 
-The x-axis indicates the number of beneficiaries reached and the y-axis indicates the per-person value of each transfer. Each point is a distribution and the size of each point indicates the number of beneficiaries reached. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#htmlwidget-e0905f35a4d4323f887f) of this report.
+The x-axis indicates the number of beneficiaries reached and the y-axis indicates the per-person value of each transfer. Each point is a distribution and the size of each point indicates the number of beneficiaries reached. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#cash-transfer-values-per-person) of this report.
 
 <br>
 
-#htmlwidget-e0905f35a4d4323f887f
-
 ```{r plotly-transfer-value-scatter}
 
-money_scatter <- fsc %>% 
+fsc %>% 
   filter(!is.na(total_value_usd) & activity_red != "livestock kits") %>%
   group_by(state, township, location, org_code, activity_red) %>% 
   summarise(beneficiaries = sum(beneficiaries), 
@@ -1349,13 +1347,13 @@ fsc_disagg %>%
 
 There are `r fsc %>% distinct(org_code) %>% nrow()` partners that were involved in direct implementation that have reported achievements in first quarter of 2022. These implementing partners corresponded to a total of `r fsc %>%  distinct(report_org_code) %>% nrow()` reporting organisations. The largest reporting organisation, org_2690, had 21 implementing partners. All other reporting organisations had 1 or 2 implementing partners.   
 
-The plot below shows the number of beneficiaries and townships reached by each implementing partner. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#5_Partners) of this report.
+The plot below shows the number of beneficiaries and townships reached by each implementing partner. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#reach-by-implementing-partner) of this report.
 
 <br>
 
 ```{r plotly-partner-scatter}
 
-partner_scatter <- fsc %>%  
+fsc %>%  
   group_by(org_code) %>% 
   summarise(states = n_distinct(state), 
             townships = n_distinct(admin3_pcode), 
@@ -1491,13 +1489,13 @@ fsc %>%
 
 ## 6. Comparison with targets 
 
-### 6.2 Township-level scatterplot of reach
+### 6.2 Reached vs target by township
 
 The specifics of each township can be reviewed with the interactive plot below. Each point is a township, with the size indicating the number of beneficiaries. The x-axis indicates the target population by township and the y-axis shows the number of beneficiaries reached in 2022/Q1. 
 
 The red line down the middle represents reaching 100% of the target. Townships above this line have reached more beneficiaries than their target and townships below the line have not met their target yet. The further away a township is from the red line, the further above or below its target it is. Mouse over each of the townships to see more details. 
 
-The 12 townships along the extreme left side of the plot have beneficiaries but do not have targets. 230 townships with targets have not been reached. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/township-level-scatterplot-of-reach) of this report. 
+The 12 townships along the extreme left side of the plot have beneficiaries but do not have targets. 230 townships with targets have not been reached. The interactive version of this scatterplot is available in the [online edition](https://food-security-cluster-myanmar.github.io/fsc_5ws_first_quarter_2022/#reached-vs-target-by-township) of this report. 
 
 <br>
 

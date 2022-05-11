@@ -3,7 +3,7 @@
     "path": "C:/Users/seany/Downloads/R/fsc_5ws_first_quarter_2022/q1_2022.Rmd",
     "project_path": "q1_2022.Rmd",
     "type": "r_markdown",
-    "hash": "3482209680",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1651120688039.0,
@@ -13,8 +13,8 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "1481,7",
-        "scrollLine": "1461",
+        "cursorPosition": "1512,315",
+        "scrollLine": "1531",
         "last_setup_crc32": "AEC1EBC3c5a27d91",
         "docOutlineSize": "105",
         "docOutlineVisible": "1",
@@ -22,11 +22,11 @@
         "rmdVisualModeLocation": "2:0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1652251552,
+    "lastKnownWriteTime": 1652253161,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1652251552165,
+    "last_content_update": 1652253161796,
     "read_only": false,
     "read_only_alternatives": []
 }

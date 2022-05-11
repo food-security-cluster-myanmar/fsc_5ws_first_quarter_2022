@@ -1362,6 +1362,8 @@ fsc_disagg %>%
 
 ## 5. Partners
 
+### 5.1 Reach by implementing partner
+
 There are `r fsc %>% distinct(org_code) %>% nrow()` partners that were involved in direct implementation that have reported achievements in first quarter of 2022. These implementing partners corresponded to a total of `r fsc %>%  distinct(report_org_code) %>% nrow()` reporting organisations. The largest reporting organisation, org_2690, had 21 implementing partners. All other reporting organisations had 1 or 2 implementing partners.   
 
 The interactive plot below shows the number of beneficiaries and townships reached by implementing partner. 
@@ -1409,7 +1411,7 @@ In 2021, it was noted that whilst there was much variation in the numbers of ben
 
 <br><br>
 
-### 5.1 Monthly progress by partner
+### 5.2 Monthly progress by partner
 
 ```{r partner-progress-facet-line}
 
@@ -1477,7 +1479,7 @@ fsc %>%
 
 <br><br>
 
-### 5.2 Donors
+### 5.3 Donors
 
 As shown by the table below, the majority of beneficiaries reported in the first quarter of 2022/Q1 were reported without any corresponding donor, as in 2021. The data in this column continues of limited utility in analysis. 
 

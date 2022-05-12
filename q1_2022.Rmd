@@ -1274,7 +1274,7 @@ fsc_disagg_values <- fsc_disagg %>%
 
 Due to the problems in reporting disaggregated beneficiary data, two tests have been applied to the submitted 5W data. The first involves a comparison to the proportions of disaggregation groups in the census to determine if values have been backfilled from the census.  
 
-The plots below show the breakdowns between the "real" values and those that have been backfilled from the census. Approximately 59% of beneficiaries reported had "real" disaggregations; this is an improvement from 2021, where only 44% of beneficiaries had "real" disaggregations. 
+The plots below show the breakdowns between the "real" values and those that have been backfilled from the census. Approximately 59% of beneficiaries reported were not backfilled from the census; this is an improvement from 2021, where only 44% of beneficiaries had "real" disaggregations. 
 
 In the "real" values, it can be seen that the proportion of adult females reached is much higher than adult males -- this is in line with the Cluster's understanding of several activities that specifically target women. The percentages of elderly persons actually reached is also much lower than what has been reported. 
 
@@ -1453,7 +1453,7 @@ fsc %>%
 
 <br>
 
-Overall, 13 implementing partners increased the number of beneficiaries reached over their 2021 totals by more than 50%; 29 partners who reported in 2021 also reported in 2022/Q1. 7 new implementing partners reported in 2022. And 28 partners who reported in 2021 but have not yet any achievements in 2022. 
+Overall, 13 implementing partners increased the number of beneficiaries reached over their 2021 totals by more than 50%; 29 partners who reported in 2021 also reported in 2022/Q1. 7 new implementing partners reported in 2022. And 28 partners who reported in 2021 but have not yet reached any beneficiaries in 2022. 
 
 ```{r}
 fsc %>%

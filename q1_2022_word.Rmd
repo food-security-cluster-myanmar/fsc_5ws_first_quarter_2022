@@ -1132,7 +1132,7 @@ fsc %>%
 
 <br>
 
-Overall, 13 implementing partners increased the number of beneficiaries reached over their 2021 totals by more than 50%; 29 partners who reported in 2021 also reported in 2022. 7 new implementing partners reported in 2022. And 28 partners who reported in 2021 but have not yet any achievements in 2022. 
+Overall, 13 implementing partners increased the number of beneficiaries reached over their 2021 totals by more than 50%; 29 partners who reported in 2021 also reported in 2022. 7 new implementing partners reported in 2022. And 28 partners who reported in 2021 but have not yet reached any beneficiaries in 2022. 
 
 ```{r}
 fsc %>%
@@ -1162,7 +1162,7 @@ fsc %>%
 
 ### 5.2 Donors
 
-As shown by the table below, the majority of beneficiaries reported in the first quarter of 2022 were reported without any corresponding donor, as in 2021. The data in this column continues of limited utility in anaylsis. 
+As shown by the table below, the majority of beneficiaries reported in the first quarter of 2022 were reported without any corresponding donor, as in 2021. The data in this column continues of limited utility in analysis. 
 
 ```{r table-donors}
 fsc %>% 

@@ -15,6 +15,16 @@ output:
 always_allow_html: yes
 ---
 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JMY3VD1QBD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-JMY3VD1QBD');
+</script>
+
 ```{css, echo=FALSE}
 
 #TOC::before {
@@ -57,7 +67,6 @@ library(plotly)
 library(patchwork)
 library(broom)
 library(DT)
-library(ggridges)
 
 theme_set(theme_light())
 

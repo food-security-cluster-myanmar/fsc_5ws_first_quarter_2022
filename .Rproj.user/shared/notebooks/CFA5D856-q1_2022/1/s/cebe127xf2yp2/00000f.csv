@@ -1,7 +1,0 @@
-"0","  ggplot(aes(x = usd_per_hhd)) +
-  geom_histogram()
-"
-"2","Error: `data` must be a data frame, or other object coercible by `fortify()`, not an S3 object with class uneval.
-Did you accidentally pass `aes()` to the `data` argument?
-[90mRun `rlang::last_error()` to see where the error occurred.[39m
-"

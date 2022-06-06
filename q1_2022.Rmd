@@ -972,7 +972,7 @@ fsc %>% partner_mean_usd("IGA and small grants") +
   plot_annotation(title = "Cash transfer values of the top implementing partners (by beneficiaries reached)", 
                   subtitle = "Faceted by activity")
 
-  
+ggsave("cash_facet_partner.png", dpi = 300, height = 5, width = 8, units = "in")    
 ```
 
 <br>
@@ -1457,7 +1457,7 @@ fsc %>%
        subtitle = "Figures show cumulative unique beneficiaries") + 
   theme(plot.title = element_text(size = 11))
 
-
+# ggsave("partner_facet_line.png", dpi = 300, height = 5, width = 8, units = "in")  
 ```
 
 <br>

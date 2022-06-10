@@ -313,3 +313,19 @@ fsc %>%  filter(state == "Yangon") %>%
   geom_histogram()
 summarise(kg_per_hhd = mean(kg_per_hhd))
 
+# Old table by activity -- perhaps you should use this again. There is actually reason for doing so since the other version raises questions 
+# about why beneficiary frequencies and unique beneficiaries don't tally. 
+# You also have the larger problem of how to determine unique beneficiaries by SO
+
+fsc %>%  
+  mutate(strat_obj = str_to_upper(strat_obj)) %>% 
+  sum_ben2(strat_obj, activity_red) %>% 
+  arrange(desc(beneficiaries)) %>% 
+  pivot_wider(names_from = strat_obj, values_from = beneficiaries, values_fill = 0, names_prefix = "ben_") %>% 
+  mutate(Total = ben_SO_1 + ben_SO_2 + ben_SO_3, 
+         `%_ben` = round(Total / sum(Total) * 100, digits = 2)) %>% 
+  relocate(ben_SO_1, .after = activity_red) %>% 
+  rename(activity = activity_red) %>% 
+  kable(caption = "Breakdown of beneficiaries by activity in 2022/Q1", format.args = list(big.mark = ",")) %>% 
+  kable_classic_2("striped")
+

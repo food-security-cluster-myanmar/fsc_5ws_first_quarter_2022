@@ -393,16 +393,26 @@ In terms of activities, the number of beneficiaries reached is heavily skewed to
 
 ```{r table-beneficiaries-activity}
 fsc %>%  
-  mutate(strat_obj = str_to_upper(strat_obj)) %>% 
-  sum_ben2(strat_obj, activity_red) %>% 
-  arrange(desc(beneficiaries)) %>% 
-  pivot_wider(names_from = strat_obj, values_from = beneficiaries, values_fill = 0, names_prefix = "ben_") %>% 
-  mutate(Total = ben_SO_1 + ben_SO_2 + ben_SO_3, 
-         `%_ben` = round(Total / sum(Total) * 100, digits = 2)) %>% 
-  relocate(ben_SO_1, .after = activity_red) %>% 
+  # filter(hub == "northeast") %>%
+  mutate(strat_obj = str_to_upper(strat_obj)) %>%
+  group_by(activity_red, strat_obj) %>% 
+  summarise_at("beneficiaries", sum) %>% 
+  pivot_wider(names_from = strat_obj, values_from = beneficiaries, values_fill = 0) %>% 
+  left_join(
+    fsc %>% 
+      # filter(hub == "northeast") %>% 
+      sum_ben(activity_red) %>% 
+      rename(unique_beneficiaries = beneficiaries), 
+    by = "activity_red"
+  ) %>% 
+  relocate(SO_3, .after = SO_2) %>% 
   rename(activity = activity_red) %>% 
-  kable(caption = "Breakdown of beneficiaries by activity in 2022/Q1", format.args = list(big.mark = ",")) %>% 
-  kable_classic_2("striped")
+  adorn_totals("row") %>% 
+  kable(caption = "Breakdown of beneficiaries by activity in 2022/Q1", 
+        format.args = list(big.mark = ",")) %>% 
+  kable_classic_2("striped") %>% 
+  footnote("The sum of beneficiary frequencies does not equal the numvber of unique beneficiaries reached", 
+           general_title = "")
 ```
 
 <br>

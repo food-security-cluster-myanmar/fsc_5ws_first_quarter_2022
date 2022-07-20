@@ -360,7 +360,9 @@ pcode1_shape <- st_read("./mmr_polbnda2_adm1_mimu_250k/mmr_polbnda2_adm1_mimu_25
         admin1_pcode = ST_PCODE) %>% st_as_sf()
 ```
 
+[Food Security Cluster Myanmar homepage](https://food-security-cluster-myanmar.github.io/)
 
+<br>
 
 ## Summary of achievements
 
@@ -1010,6 +1012,7 @@ fsc %>% filter(!is.na(total_value_usd) & activity_red != "livestock kits") %>%
 
 <br>
 
+
 Additionally, each of the bubbles indicate an individual distribution, with their position along the x-axis showing the USD per person value of the distribution and the size of each bubble indicates the number of beneficiaries reached. 
 
 Despite being the activity which reached the most beneficiaries, food distributions have one of the tightest ranges of transfer values, though, as will be explored further in the plot below and in the next section, there are substantial outliers. 
@@ -1595,10 +1598,13 @@ fsc %>%
   theme_void() +
   theme(legend.text = element_text(size = 10),
         legend.title = element_text(size = 10),
-        legend.key.size = unit(0.7, 'cm')) +
-  labs(title = "Beneficiaries by township",
+        legend.key.size = unit(0.7, 'cm'), 
+        plot.background = element_rect(fill = "white", colour = "white")) +
+  labs(title = "Beneficiaries by township, Q1 2022",
        subtitle = "townships in grey do not have any partners present", 
-       fill = "Beneficiaries") +
+       fill = "Beneficiaries") 
+
+# ggsave("beneficiaries_by_tsp.png", dpi = 300, height = 18, width = 11, units = "in")
 
 pin %>% 
   right_join(pcode3_shape, by = "admin3_pcode") %>% 
@@ -1612,11 +1618,34 @@ pin %>%
   theme_void() + 
   theme(legend.text = element_text(size = 10),
           legend.title = element_text(size = 10),
-          legend.key.size = unit(0.7, 'cm')) +
+          legend.key.size = unit(0.7, 'cm'), 
+        plot.background = element_rect(fill = "white", colour = "white")) +
     labs(title = "2022 target by township",
          subtitle = "townships in grey do not food security targets", 
          fill = "target")
 
+# ggsave("target_by_tsp.png", dpi = 300, height = 18, width = 11, units = "in")
+
+
+pin %>% 
+  right_join(pcode3_shape, by = "admin3_pcode") %>% 
+  st_as_sf() %>%  
+  ggplot() + 
+  geom_sf(aes(fill = fs_pin), size = .1) + 
+  scale_fill_viridis_c(direction = -1, trans = "log10",  
+                       breaks = c(100, 1000, 10000, 100000, 500000),
+                       limits = range(57, 801760), 
+                       labels = comma) + 
+  theme_void() + 
+  theme(legend.text = element_text(size = 10),
+          legend.title = element_text(size = 10),
+          legend.key.size = unit(0.7, 'cm'), 
+        plot.background = element_rect(fill = "white", colour = "white")) +
+    labs(title = "2022 PIN by township",
+         subtitle = "townships in grey have not yet had a PIN calculated", 
+         fill = "PIN")
+
+# ggsave("pin_by_tsp.png", dpi = 300, height = 18, width = 11, units = "in")
 
 ```
 <br>
@@ -1657,9 +1686,6 @@ fsc %>%
 
 
 ```
-
-
-
 
 
 

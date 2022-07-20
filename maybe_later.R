@@ -329,3 +329,125 @@ fsc %>%
   kable(caption = "Breakdown of beneficiaries by activity in 2022/Q1", format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped")
 
+fsc %>% filter(!is.na(total_value_usd) & delivery_modality %in% c("CBT/CVA")) %>% 
+  mutate(year = "2022") %>% 
+  select(total_value_usd, year, beneficiaries, activity_red) %>% 
+  rbind(fsc_2021 %>%
+          filter(!is.na(total_value_usd) & delivery_modality %in% c("Cash", "Voucher")) %>%
+          mutate(year = "2021") %>% 
+          select(total_value_usd, year, beneficiaries, activity_red)) %>% 
+  filter(activity_red %in% c("IGA and small grants", "food_cash for work_assets", 
+                             "food distribution")) %>% 
+  mutate(activity_red = fct_relevel(activity_red, c("food distribution",
+                                                    "crop, vegetable and seed kits",
+                                                    "food_cash for work_assets", 
+                                                    "IGA and small grants"))) %>% 
+  mutate(usd_per_person = total_value_usd / beneficiaries) %>% 
+  ggplot(aes(x = usd_per_person, y = activity_red, colour = year)) + 
+  geom_boxplot() +
+  scale_colour_manual(values = c("#2e9fdf", "#fc4e07")) +
+  scale_x_continuous(trans = "log10", limits = c(1, 100), 
+                     breaks = c(1, 3, 10, 30, 100)) +
+  labs(x = "USD per person", y = "", 
+       title = "2021-2022 comaprison between cash transfer values", 
+       subtitle = "Only includes activities implemented through cash or voucher modalities") 
+
+ggsave("boxplot_cash_year.png", dpi = 300, height = 5, width = 8, units = "in")
+
+fsc %>% filter(!is.na(unit)) %>% 
+  mutate(quantity = case_when(unit == "MT" ~ quantity * 1000, 
+                              unit == "Kits" ~ households, 
+                              TRUE ~ quantity), 
+         unit = recode(unit, "MT" = "Kg")) %>% 
+  group_by(unit, activity_red) %>% 
+  summarise(quantity = sum(quantity),
+            beneficiaries = sum(new_beneficiaries)) %>%
+  pivot_longer(cols = c(quantity, beneficiaries)) %>% 
+  mutate(act_unit = paste0(activity_red, "_", unit)) %>% 
+  ggplot(aes(x = value, y = fct_reorder(act_unit, value),  fill = act_unit)) + 
+  geom_col() + 
+  geom_text(aes(label = comma(value)), hjust = "inward") +
+  facet_wrap(~ name, scales = "free_x") + 
+  scale_x_continuous(trans = "log10", labels = comma) +
+  theme(legend.position = "none") + 
+  labs(x = "", y = "", 
+       title = "Quantitites distributed and beneficiaries reached, Q1 2022", 
+       subtitle = "Only includes entries which specified quantities")
+
+ggsave("quantities_q1_2022.png", dpi = 300, height = 5, width = 8, units = "in")
+
+fsc_2021 %>% 
+  filter(!is.na(unit_for_in_kind_assistance)) %>% 
+  group_by(unit = unit_for_in_kind_assistance, activity_red) %>% 
+  summarise(quantity = sum(quantity_for_in_kind_assistance, na.rm = TRUE), 
+            beneficiaries = sum(beneficiaries)) %>% 
+  arrange(desc(beneficiaries)) %>% 
+  filter(unit == "Metric Ton" & activity_red == "food distribution") %>% 
+  mutate(per_person = quantity * 1000 / beneficiaries)
+
+fsc_2021 %>% 
+  filter(unit_for_in_kind_assistance == "Metric Ton" & activity_red == "food distribution") %>% 
+  sample_n(10) %>% 
+  pull(activity_description)
+
+
+fsc %>% 
+  select(org_code, report_org_code, month_of_implementation, donor, 
+         state, township, 
+         activity, frequency, unit, quantity, delivery_modality, 
+         beneficiaries, new_beneficiaries, 
+         value_per_household_usd, usd_per_person)
+
+fsc %>% 
+  group_by(frequency, activity_red) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries, na.rm = TRUE), 
+            .groups = "drop") %>% 
+  ggplot(aes(x = beneficiaries, y = activity_red, fill = frequency)) + 
+  geom_col(position = position_dodge(width = .9, preserve = "single")) + 
+  scale_x_continuous(trans = "log10", labels = comma, 
+                     breaks = c(10, 100, 1000, 10000, 100000, 800000)) + 
+  labs(x = "Beneficiaries", y = "",
+       title = "Breakdown of beneficiaries by frequency of intervention, Q1 2022")
+
+ggsave("frequency_q1_2022.png", dpi = 300, height = 5, width = 8, units = "in")
+
+fsc %>% 
+  filter(frequency == "Quarterly") %>% 
+  group_by(org_code) %>% 
+  summarise(beneficiaries =sum(new_beneficiaries, na.rm = TRUE))
+
+fsc %>%  filter(org_code == "org_5911") %>% 
+  pull(activity_description)
+
+
+fsc %>%
+  group_by(activity, beneficiary_type) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries)) %>%
+  mutate(beneficiary_type = str_remove(beneficiary_type, "Rakhine "), 
+         activity = str_remove(activity, " \\(in kind/voucher/cash\\)| \\(MPC\\)")) %>% 
+  
+  arrange(desc(beneficiaries, activity)) %>%
+  filter(beneficiaries > 1000) %>% 
+  ggplot(aes(x = beneficiaries, y = activity)) +
+  geom_col(aes(fill = beneficiary_type)) + 
+  scale_x_continuous(labels = comma, 
+                     breaks = seq(0, 2000000, 250000)) + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1), 
+        legend.position = "bottom") + 
+  guides(fill = guide_legend(nrow = 2, byrow = TRUE)) +
+  labs(x = "Number of beneficiaries", y = "", 
+       fill = "",
+       title = "Number of beneficiaries reached, by beneficiary type", 
+       subtitle = "Only showing interventions with >1,000 beneficiaries")
+
+ggsave("beneficiary_type_q1_2022.png", dpi = 300, height = 5, width = 8, units = "in")
+
+
+geom_col(aes(fill = beneficiary_type) 
+         position = position_dodge(), 
+         preserve = "single", 
+         width = .9) + 
+  # scale_x_continuous(trans = "log10") +
+  theme(legend.position = "top") + 
+  labs(x = "Number of beneficiaries", y = "", 
+       fill = "")

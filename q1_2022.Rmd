@@ -984,7 +984,7 @@ fsc %>% partner_mean_usd("IGA and small grants") +
   plot_annotation(title = "Cash transfer values of the top implementing partners (by beneficiaries reached)", 
                   subtitle = "Faceted by activity")
 
-ggsave("cash_facet_partner.png", dpi = 300, height = 5, width = 8, units = "in")    
+# ggsave("cash_facet_partner.png", dpi = 300, height = 5, width = 8, units = "in")    
 ```
 
 <br>
@@ -1371,7 +1371,7 @@ fsc_disagg %>%
   # summarise(ben = sum(ben_sub)) %>%
   # mutate(pc = ben / sum(ben))
   ggplot(aes(x = sd)) +
-  geom_histogram() + 
+  geom_histogram() +
   scale_x_continuous(labels = percent_format(accuracy = 1)) + 
   labs(x = "Percentage difference from group mean", 
        title = "Histogram of standard deviations across beneficiary disaggregations", 
